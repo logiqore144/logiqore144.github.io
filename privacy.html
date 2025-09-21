@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - LogiQore</title>
+    
+    <!-- Application Insights -->
+    <script>
+    !function(T,l,y){var S=T.location,k="script",D="instrumentationKey",C="ingestionendpoint",I="disableExceptionTracking",E="ai.device.",b="toLowerCase",w="crossOrigin",N="POST",e="appInsightsSDK",t=y.name||"appInsights";(y.name||T[e])&&(T[e]=t);var n=T[t]||function(d){var g=!1,f=!1,m={initialize:!0,queue:[],sv:"5",version:2,config:d};function v(e,t){var n={},a="Browser";return n[E+"id"]=a[b](),n[E+"type"]=a,n["ai.operation.name"]=S&&S.pathname||"_unknown_",n["ai.internal.sdkVersion"]="javascript:snippet_"+(m.sv||m.version),{time:function(){var a=new Date;function b(e){var t=""+e;return 1===t.length&&(t="0"+t),t}return a.getUTCFullYear()+"-"+b(1+a.getUTCMonth())+"-"+b(a.getUTCDate())+"T"+b(a.getUTCHours())+":"+b(a.getUTCMinutes())+":"+b(a.getUTCSeconds())+"."+(a.getUTCMilliseconds()/1e3).toFixed(3).slice(2,5)+"Z"}(),iKey:e,name:"Microsoft.ApplicationInsights."+t.replace(/-/g,"")+"."+n,sampleRate:100,tags:n,data:{baseData:{ver:2}}}}var h=d.url||y.src;if(h){function a(e){var t,n,a,i,r,o,s,c,u,p,l;g=!0,m.queue=[],f||(f=!0,t=h,s=function(){var e={},t=d.connectionString;if(t)for(var n=t.split(";"),a=0;a<n.length;a++){var i=n[a].split("=");2===i.length&&(e[i[0][b]()]=i[1])}if(!e[C]){var r=e.endpointsuffix,o=r?e.location:null;e[C]="https://"+(o?o+".":"")+"dc."+(r||"services.visualstudio.com")}return e}(),c=s[D]||d[D]||"",u=s[C],p=u?u+"/v2/track":d.endpointUrl,(l=[]).push((n="SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details)",a=t,i=p,(o=(r=v(c,"Exception")).data).baseType="ExceptionData",o.baseData.exceptions=[{typeName:"SDKLoadFailed",message:n.replace(/\./g,"-"),hasFullStack:!1,stack:n+"\nSnippet failed to load ["+a+"] -- Telemetry is disabled\nHelp Link: https://go.microsoft.com/fwlink/?linkid=2128109\nHost: "+(S&&S.pathname||"_unknown_")+"\nEndpoint: "+i,parsedStack:[]}],r)),l.push(function(e,t,n,a){var i=v(c,"Message"),r=i.data;r.baseType="MessageData";var o=r.baseData;return o.message='AI (Internal): 99 message:"'+("SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details) ("+n+")").replace(/\"/g,"")+'"',o.properties={endpoint:a},i}(0,0,t,p)),function(e,t){if(JSON){var n=T.fetch;if(n&&!y.useXhr)n(t,{method:N,body:JSON.stringify(e),mode:"cors"});else if(XMLHttpRequest){var a=new XMLHttpRequest;a.open(N,t),a.setRequestHeader("Content-type","application/json"),a.send(JSON.stringify(e))}}}(l,p))}function i(e,t){f||setTimeout(function(){!t&&m.core||a()},500)}var e=function(){var n=l.createElement(k);n.src=h;var e=y[w];return!e&&""!==e||"undefined"==n[w]||(n[w]=e),n.onload=i,n.onerror=a,n.onreadystatechange=function(e,t){"loaded"!==n.readyState&&"complete"!==n.readyState||i(0,t)},n}();y.ld<0?l.getElementsByTagName("head")[0].appendChild(e):setTimeout(function(){l.getElementsByTagName(k)[0].parentNode.insertBefore(e,l.getElementsByTagName(k)[0])},y.ld||0)}try{m.cookie=l.cookie}catch(p){}function t(e){for(;e.length;)!function(t){m[t]=function(){var e=arguments;g||m.queue.push(function(){m[t].apply(m,e)})}}(e.pop())}var n="track",r="TrackPage",o="TrackEvent";t([n+"Event",n+"PageView",n+"Exception",n+"Trace",n+"DependencyData",n+"Metric",n+"PageViewPerformance","start"+r,"stop"+r,"start"+o,"stop"+o,"addTelemetryInitializer","setAuthenticatedUserContext","clearAuthenticatedUserContext","flush"]),m.SeverityLevel={Verbose:0,Information:1,Warning:2,Error:3,Critical:4};var s=(d.extensionConfig||{}).ApplicationInsightsAnalytics||{};if(!0!==d[I]&&!0!==s[I]){var c="onerror";t(["_"+c]);var u=T[c];T[c]=function(e,t,n,a,i){var r=u&&u(e,t,n,a,i);return!0!==r&&m["_"+c]({message:e,url:t,lineNumber:n,columnNumber:a,error:i}),r},d.autoExceptionInstrumented=!0}return m}(y.cfg);function a(){y.onInit&&y.onInit(n)}(T[t]=n).queue&&0===n.queue.length?(n.queue.push(a),n.trackPageView({})):a)}(window,document,{
+        src: "https://js.monitor.azure.com/scripts/b/ai.2.min.js",
+        cfg: {
+            connectionString: "InstrumentationKey=7e6b5832-fa2b-4436-9f0f-8744afd1eae9;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=afe779d3-7128-4628-95f6-2c239c1f82f8"
+        }
+    });
+    
+    // Track page view
+    appInsights.trackPageView({ name: 'Privacy Policy' });
+
+        // Navigation tracking function
+        function trackNavigation(action) {
+            try {
+                appInsights.trackEvent({
+                    name: 'NavigationClick',
+                    properties: {
+                        action: action,
+                        timestamp: new Date().toISOString()
+                    }
+                });
+            } catch (e) {
+                console.log('Navigation tracking error:', e);
+            }
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .privacy-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 48px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 48px;
+            line-height: 1.6;
+            color: #374151;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 32px;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: #1d4ed8;
+        }
+        
+        .back-link svg {
+            margin-right: 8px;
+        }
+        
+        h2 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 32px 0 16px 0;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        
+        p {
+            margin-bottom: 16px;
+        }
+        
+        ul {
+            margin: 16px 0 16px 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #0ea5e9;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .contact-info {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        strong {
+            color: #1f2937;
+        }
+        
+        .last-updated {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .content {
+                padding: 24px;
+            }
+            
+            .header {
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-6xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">LQ</span>
+                    </div>
+                    <span class="text-xl font-semibold text-gray-900">LogiQore</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors" onclick="trackNavigation('BackToPlatform')">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        <span class="text-sm font-medium">Back to Platform Overview</span>
+                    </a>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-sm text-gray-600">Platform Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="privacy-container">
+        <div class="header">
+            <h1>Privacy Policy</h1>
+            <p>Simple, honest data protection</p>
+        </div>
+        
+        <div class="content">
+            <a href="/public-calculator/" class="back-link">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Calculator
+            </a>
+
+            <div class="highlight-box">
+                <p><strong>The Bottom Line:</strong> LogiQore is a UK company that helps optimize Microsoft Sentinel costs. We only collect data you give us through our calculator and contact forms. We don't sell your data, send spam, or share it with anyone without permission. Your data stays in the UK/EU and you can ask us to delete it anytime.</p>
+            </div>
+
+            <h2>What We Collect</h2>
+            <p>When you use our cost calculator or contact us, we collect:</p>
+            <ul>
+                <li>Your name, email, and company details</li>
+                <li>Technical information about your Microsoft Sentinel setup</li>
+                <li>Website usage data (which pages you visit, how long you spend)</li>
+            </ul>
+
+            <h2>How We Use It</h2>
+            <ul>
+                <li>Provide you with cost savings calculations</li>
+                <li>Schedule and conduct technical consultation calls</li>
+                <li>Improve our calculator and website</li>
+                <li>Respond to your questions</li>
+            </ul>
+
+            <p><strong>We don't:</strong> Send marketing emails unless you ask, sell your data to anyone, or use it for anything other than helping with your Microsoft Sentinel costs.</p>
+
+            <h2>Where Your Data Is Stored</h2>
+            <p>All data is stored in the UK using Microsoft Azure (UK South region). Contact forms are processed by Formspree (EU-based). Your data never leaves the UK/EU.</p>
+
+            <h2>Your Rights</h2>
+            <p>You can ask us to:</p>
+            <ul>
+                <li>Send you a copy of your data</li>
+                <li>Correct any mistakes</li>
+                <li>Delete your data completely</li>
+                <li>Stop processing your data</li>
+            </ul>
+
+            <h2>Contact Us</h2>
+            <div class="contact-info">
+                For any privacy questions or to exercise your rights:<br>
+                <strong>Email:</strong> info@logiqore.com<br>
+                <strong>Response time:</strong> Within 30 days
+            </div>
+
+            <p>If you're not happy with how we handle your data, you can complain to the UK Information Commissioner's Office at ico.org.uk</p>
+
+            <div class="last-updated">
+                Last updated: August 28, 2025
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiQore - Revolutionary SIEM Cost Optimization Solution for Security Service Providers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Application Insights - PRODUCT FOCUSED -->
+    <script>
+    !function(T,l,y){var S=T.location,k="script",D="instrumentationKey",C="ingestionendpoint",I="disableExceptionTracking",E="ai.device.",b="toLowerCase",w="crossOrigin",N="POST",e="appInsightsSDK",t=y.name||"appInsights";(y.name||T[e])&&(T[e]=t);var n=T[t]||function(d){var g=!1,f=!1,m={initialize:!0,queue:[],sv:"5",version:2,config:d};function v(e,t){var n={},a="Browser";return n[E+"id"]=a[b](),n[E+"type"]=a,n["ai.operation.name"]=S&&S.pathname||"_unknown_",n["ai.internal.sdkVersion"]="javascript:snippet_"+(m.sv||m.version),{time:function(){var a=new Date;function b(e){var t=""+e;return 1===t.length&&(t="0"+t),t}return a.getUTCFullYear()+"-"+b(1+a.getUTCMonth())+"-"+b(a.getUTCDate())+"T"+b(a.getUTCHours())+":"+b(a.getUTCMinutes())+":"+b(a.getUTCSeconds())+"."+(a.getUTCMilliseconds()/1e3).toFixed(3).slice(2,5)+"Z"}(),iKey:e,name:"Microsoft.ApplicationInsights."+t.replace(/-/g,"")+"."+n,sampleRate:100,tags:n,data:{baseData:{ver:2}}}}var h=d.url||y.src;if(h){function a(e){var t,n,a,i,r,o,s,c,u,p,l;g=!0,m.queue=[],f||(f=!0,t=h,s=function(){var e={},t=d.connectionString;if(t)for(var n=t.split(";"),a=0;a<n.length;a++){var i=n[a].split("=");2===i.length&&(e[i[0][b]()]=i[1])}if(!e[C]){var r=e.endpointsuffix,o=r?e.location:null;e[C]="https://"+(o?o+".":"")+"dc."+(r||"services.visualstudio.com")}return e}(),c=s[D]||d[D]||"",u=s[C],p=u?u+"/v2/track":d.endpointUrl,(l=[]).push((n="SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details)",a=t,i=p,(o=(r=v(c,"Exception")).data).baseType="ExceptionData",o.baseData.exceptions=[{typeName:"SDKLoadFailed",message:n.replace(/\./g,"-"),hasFullStack:!1,stack:n+"\nSnippet failed to load ["+a+"] -- Telemetry is disabled\nHelp Link: https://go.microsoft.com/fwlink/?linkid=2128109\nHost: "+(S&&S.pathname||"_unknown_")+"\nEndpoint: "+i,parsedStack:[]}],r)),l.push(function(e,t,n,a){var i=v(c,"Message"),r=i.data;r.baseType="MessageData";var o=r.baseData;return o.message='AI (Internal): 99 message:"'+("SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details) ("+n+")").replace(/\"/g,"")+'"',o.properties={endpoint:a},i}(0,0,t,p)),function(e,t){if(JSON){var n=T.fetch;if(n&&!y.useXhr)n(t,{method:N,body:JSON.stringify(e),mode:"cors"});else if(XMLHttpRequest){var a=new XMLHttpRequest;a.open(N,t),a.setRequestHeader("Content-type","application/json"),a.send(JSON.stringify(e))}}}(l,p))}function i(e,t){f||setTimeout(function(){!t&&m.core||a()},500)}var e=function(){var n=l.createElement(k);n.src=h;var e=y[w];return!e&&""!==e||"undefined"==n[w]||(n[w]=e),n.onload=i,n.onerror=a,n.onreadystatechange=function(e,t){"loaded"!==n.readyState&&"complete"!==n.readyState||i(0,t)},n}();y.ld<0?l.getElementsByTagName("head")[0].appendChild(e):setTimeout(function(){l.getElementsByTagName(k)[0].parentNode.insertBefore(e,l.getElementsByTagName(k)[0])},y.ld||0)}try{m.cookie=l.cookie}catch(p){}function t(e){for(;e.length;)!function(t){m[t]=function(){var e=arguments;g||m.queue.push(function(){m[t].apply(m,e)})}}(e.pop())}var n="track",r="TrackPage",o="TrackEvent";t([n+"Event",n+"PageView",n+"Exception",n+"Trace",n+"DependencyData",n+"Metric",n+"PageViewPerformance","start"+r,"stop"+r,"start"+o,"stop"+o,"addTelemetryInitializer","setAuthenticatedUserContext","clearAuthenticatedUserContext","flush"]),m.SeverityLevel={Verbose:0,Information:1,Warning:2,Error:3,Critical:4};var s=(d.extensionConfig||{}).ApplicationInsightsAnalytics||{};if(!0!==d[I]&&!0!==s[I]){var c="onerror";t(["_"+c]);var u=T[c];T[c]=function(e,t,n,a,i){var r=u&&u(e,t,n,a,i);return!0!==r&&m["_"+c]({message:e,url:t,lineNumber:n,columnNumber:a,error:i}),r},d.autoExceptionInstrumented=!0}return m}(y.cfg);function a(){y.onInit&&y.onInit(n)}(T[t]=n).queue&&0===n.queue.length?(n.queue.push(a),n.trackPageView({})):a()}(window,document,{
+        src: "https://js.monitor.azure.com/scripts/b/ai.2.min.js",
+        cfg: {
+            connectionString: "InstrumentationKey=7e6b5832-fa2b-4436-9f0f-8744afd1eae9;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=afe779d3-7128-4628-95f6-2c239c1f82f8"
+        }
+    });
+
+    // Product-focused analytics configuration
+    const cfg = {
+        pg: btoa('ProductHomePage'),
+        ev1: btoa('ProductInterest'),
+        ev2: btoa('PartnershipInquiry'),
+        ev3: btoa('NavigationClick'),
+        ev4: btoa('CompetitiveAdvantage'),
+        ev5: btoa('IntegrationRequest')
+    };
+
+    // Track initial page view with geographic context
+    appInsights.trackPageView({ 
+        name: atob(cfg.pg),
+        properties: {
+            pageVersion: 'uk_gbp_primary',
+            marketingRegion: 'uk_focused',
+            timestamp: new Date().toISOString()
+        }
+    });
+
+    // Analytics functions
+    function trackProductInterest(feature, context) {
+        const props = {};
+        props[atob('ZmVhdHVyZQ==')] = feature;
+        props[atob('Y29udGV4dA==')] = context;
+        props[atob('cHJvZHVjdE1hdHVyaXR5')] = '80_percent_complete';
+        props[atob('bWFya2V0UmVnaW9u')] = 'uk_primary';
+        props[atob('Y3VycmVuY3k=')] = 'GBP';
+        props[atob('dGltZXN0YW1w')] = new Date().toISOString();
+        
+        appInsights.trackEvent({
+            name: atob(cfg.ev1),
+            properties: props
+        });
+    }
+
+    function trackPartnershipInquiry(type, urgency) {
+        const props = {};
+        props[atob('cGFydG5lcnNoaXBUeXBl')] = type;
+        props[atob('dXJnZW5jeQ==')] = urgency;
+        props[atob('bWFya2V0UmVhZGluZXNz')] = 'immediate_deployment';
+        props[atob('bWFya2V0UmVnaW9u')] = 'uk_primary';
+        props[atob('Y3VycmVuY3k=')] = 'GBP';
+        props[atob('dGltZXN0YW1w')] = new Date().toISOString();
+        
+        appInsights.trackEvent({
+            name: atob(cfg.ev2),
+            properties: props
+        });
+    }
+
+    function trackNavigation(destination, context) {
+        const props = {};
+        props[atob('ZGVzdGluYXRpb24=')] = destination;
+        props[atob('Y29udGV4dA==')] = context;
+        props[atob('c291cmNlUGFnZQ==')] = 'product_home';
+        
+        appInsights.trackEvent({
+            name: atob(cfg.ev3),
+            properties: props
+        });
+    }
+
+    // CTA click tracking
+    function trackCTA(ctaName, destination) {
+        trackNavigation(destination, ctaName);
+        return true;
+    }
+
+    window.trackProductInterest = trackProductInterest;
+    window.trackPartnershipInquiry = trackPartnershipInquiry;
+    window.trackNavigation = trackNavigation;
+    window.trackCTA = trackCTA;
+
+    // Authentication gate functions
+    function requestAuthenticatedAccess(targetUrl, contentType) {
+        trackPartnershipInquiry('authentication-request', contentType);
+        showAuthModal(targetUrl, contentType);
+    }
+
+    function showAuthModal(targetUrl, contentType) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg p-8 max-w-md mx-4">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Authentication Required</h3>
+                    <p class="text-gray-600 text-sm">This content requires partner qualification and SOW engagement.</p>
+                </div>
+                <div class="space-y-4">
+                    <button onclick="initiateAuth('${targetUrl}', '${contentType}')" 
+                            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        Authenticate with Azure Entra ID
+                    </button>
+                    <button onclick="requestPartnerAccess('${contentType}')" 
+                            class="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors">
+                        Request SOW Engagement
+                    </button>
+                    <button onclick="closeAuthModal()" 
+                            class="w-full text-gray-500 hover:text-gray-700 py-2">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeAuthModal();
+            }
+        });
+    }
+
+    function closeAuthModal() {
+        const modal = document.querySelector('.fixed.inset-0');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    function initiateAuth(targetUrl, contentType) {
+        trackPartnershipInquiry('azure-auth-attempt', contentType);
+        console.log('Initiating Azure Entra ID authentication...');
+        console.log('Target URL:', targetUrl);
+        console.log('Content Type:', contentType);
+        alert('Azure Entra ID authentication would be initiated here. In production, this redirects to Microsoft authentication.');
+        closeAuthModal();
+    }
+
+    function requestPartnerAccess(contentType) {
+        trackPartnershipInquiry('sow-engagement-request', contentType);
+        window.location.href = '/request_access.html?content=' + encodeURIComponent(contentType);
+    }
+
+    window.requestAuthenticatedAccess = requestAuthenticatedAccess;
+    window.showAuthModal = showAuthModal;
+    window.closeAuthModal = closeAuthModal;
+    window.initiateAuth = initiateAuth;
+    window.requestPartnerAccess = requestPartnerAccess;
+
+    // Cost methodology tooltip functions
+    function showCostTooltip(event) {
+        const tooltip = document.getElementById('cost-methodology-tooltip');
+        const rect = event.target.getBoundingClientRect();
+        
+        // Position tooltip above the hovered element
+        tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+        tooltip.style.left = (rect.left + rect.width/2 - 144) + 'px'; // 144 is half of w-72 (288px/2)
+        
+        tooltip.classList.remove('hidden');
+        
+        // Track tooltip interaction
+        trackProductInterest('cost-methodology-hint', 'tooltip-hover');
+    }
+
+    function hideCostTooltip() {
+        const tooltip = document.getElementById('cost-methodology-tooltip');
+        tooltip.classList.add('hidden');
+    }
+
+    window.showCostTooltip = showCostTooltip;
+    window.hideCostTooltip = hideCostTooltip;
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-6xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">LQ</span>
+                    </div>
+                    <span class="text-xl font-semibold text-gray-900">LogiQore</span>
+                </div>
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#" onclick="requestAuthenticatedAccess('/competitive-analysis.html', 'competitive-intelligence'); trackCTA('header-competitive-analysis', 'competitive-analysis')"
+                       class="text-gray-600 hover:text-blue-600 font-medium transition-colors inline-flex items-center">
+                        <svg class="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                        </svg>
+                        Competitive Analysis
+                    </a>
+                    <a href="/privacy.html" 
+                       onclick="trackCTA('header-privacy', 'privacy')"
+                       class="text-gray-600 hover:text-blue-600 transition-colors">
+                        Privacy
+                    </a>
+                    <a href="/public-calculator/" 
+                       onclick="trackCTA('header-demo-calculator', 'calculator')"
+                       class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        Cost Calculator
+                    </a>
+                </nav>
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span class="text-sm text-gray-600">SOW-Based Engagement</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-12">
+        <!-- THE WHY - Industry Problem -->
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-800 text-sm font-medium mb-6"
+                 onclick="trackProductInterest('market-opportunity', 'header-badge')">
+                <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                Multi-Billion Pound Market Inefficiency
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl font-bold text-gray-900 mb-6"
+                    onclick="trackProductInterest('headline-engagement', 'primary-message')">
+                    The First Solution to Solve<br/>
+                    <span class="text-blue-600">Enterprise SIEM Cost Crisis</span>
+                </h1>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-8 mb-8">
+                    <h2 class="text-2xl font-semibold text-blue-900 mb-4">The Market Opportunity</h2>
+                    <p class="text-xl text-blue-800 leading-relaxed mb-6">
+                        <strong>McKinsey research confirms:</strong> Enterprises process <em>"80 to 98 percent of logs that are simply noise"</em> through premium SIEM licensing, creating a fundamental economic inefficiency. This presents a significant opportunity for MSPs to deliver superior value.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6 text-left">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <div class="font-semibold text-blue-900">MSPs constrained by economics</div>
+                                <div class="text-blue-700 text-sm">Current SIEM pricing models prevent comprehensive security offerings</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <div class="font-semibold text-blue-900">Enterprises seek cost-effective security</div>
+                                <div class="text-blue-700 text-sm">Market demand for comprehensive monitoring without premium pricing</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-sm text-gray-600 mb-8">
+                    <a href="https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/tech-forward/mitigating-cyberrisks-with-smart-log-management" 
+                       target="_blank" rel="noopener"
+                       onclick="trackProductInterest('mckinsey-research', 'authority-source')" 
+                       class="hover:text-blue-600 cursor-pointer underline">
+                        McKinsey: "Mitigating cyberrisks with smart log management"
+                    </a> • 
+                    <a href="https://www.deloitte.com/content/dam/assets-zone3/us/en/docs/services/risk-advisory/2024/us-deloitte-laao-report.pdf" 
+                       target="_blank" rel="noopener"
+                       onclick="trackProductInterest('deloitte-research', 'authority-source')" 
+                       class="hover:text-blue-600 cursor-pointer underline">
+                        Deloitte: "Future of Cyber Survey 2024"
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- THE HOW - Ben's Breakthrough -->
+        <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-8 text-white mb-16">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-4">The Breakthrough</h2>
+                    <p class="text-xl text-green-100 mb-6">
+                        After 15 years optimizing SIEM architectures across <strong>Critical National Infrastructure, global investment banking, telecommunications, and higher education</strong>, I identified the core economic flaw that makes comprehensive security monitoring financially impossible for mid-market enterprises.
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8 mb-8">
+                    <div onclick="trackProductInterest('ben-credibility', 'patent-holder')" class="text-center cursor-pointer">
+                        <div class="text-3xl font-bold">Patent Holder</div>
+                        <div class="text-green-100 text-sm">Advanced threat detection innovation</div>
+                    </div>
+                    <div onclick="trackProductInterest('ben-credibility', 'cost-optimizer')" class="text-center cursor-pointer">
+                        <div class="text-3xl font-bold">Proven Optimizer</div>
+                        <div class="text-green-100 text-sm">Delivered measurable SIEM cost reductions</div>
+                    </div>
+                    <div onclick="trackProductInterest('ben-credibility', 'azure-specialist')" class="text-center cursor-pointer">
+                        <div class="text-3xl font-bold">15 Years</div>
+                        <div class="text-green-100 text-sm">Multi-sector security architecture</div>
+                    </div>
+                </div>
+
+                <div class="bg-white bg-opacity-10 rounded-xl p-6">
+                    <h3 class="text-xl font-semibold mb-4">The Realization</h3>
+                    <p class="text-green-100 mb-4">
+                        <strong>Enterprise SIEM vendors optimize for feature richness, not economic efficiency.</strong> 
+                        They assume unlimited budgets and enterprise discount structures that don't exist in the MSP market.
+                    </p>
+                    <p class="text-green-100">
+                        <strong>4 months of focused R&D</strong> produced what billion-dollar security vendors couldn't: 
+                        an architecture that processes 100% of network security data at 15% of traditional SIEM costs.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- THE WHAT - Solution Overview -->
+        <div class="mb-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">The Solution: LogiQore</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Proprietary Azure-native architecture delivering 
+                    <span class="relative inline-block">
+                        <span class="cursor-help font-semibold text-blue-600 border-b border-dotted border-blue-400"
+                              onmouseover="showCostTooltip(event)" 
+                              onmouseout="hideCostTooltip()"
+                              onclick="trackProductInterest('cost-methodology-hint', 'tooltip-interaction')">
+                            84-97% Microsoft Sentinel cost reduction
+                        </span>
+                        <div id="cost-methodology-tooltip" 
+                             class="fixed hidden bg-gray-900 text-white text-sm rounded-lg p-4 shadow-xl z-[9999] w-72 pointer-events-none"
+                             style="top: 0; left: 0;">
+                            <div class="text-xs mb-2 text-gray-300">Azure Architecture Overview:</div>
+                            <div class="mb-2">Route network logs to optimized Azure storage at ~85% lower cost per GB than Sentinel</div>
+                            <div class="text-xs text-gray-400">Full methodology available through SOW engagement</div>
+                            <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                    </span>
+                    while maintaining complete security detection capability.
+                </p>
+            </div>
+
+            <!-- Core Value Proposition -->
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Economic Breakthrough</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <strong>Predictable Cost Model:</strong> Linear scaling with transparent pricing structure
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <strong>Network Data Optimization:</strong> Process 80% of logs at £0.15/GB vs Sentinel's £4.036/GB
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <strong>MSP Economics:</strong> Transparent pricing enables profitable managed security services
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-4 bg-green-50 rounded-lg">
+                        <div class="text-sm text-green-800">
+                            <strong>Sample Impact:</strong> 50GB/day enterprise saves £53,856 annually (87% reduction)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-lg">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Technical Innovation</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <strong>Dual Analytics Architecture:</strong> Intelligent routing between Sentinel and Azure Data Explorer
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <strong>Minimal SOC Disruption:</strong> Existing Sentinel workflows enhanced, not replaced
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <strong>Enhanced Detection:</strong> 100% network visibility with advanced analytics capability
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <div class="text-sm text-blue-800">
+                            <strong>Implementation:</strong> 2-4 weeks to production with minimal client disruption
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credibility Indicators -->
+            <div class="bg-gray-50 rounded-2xl p-8">
+                <div class="max-w-4xl mx-auto">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6 text-center">Solution Maturity</h3>
+                    <div class="grid md:grid-cols-4 gap-6 mb-6">
+                        <div onclick="trackProductInterest('maturity-status', 'architecture-complete')" class="text-center cursor-pointer">
+                            <div class="text-2xl font-bold text-green-600">✓ Complete</div>
+                            <div class="text-sm text-gray-600">Core Architecture</div>
+                        </div>
+                        <div onclick="trackProductInterest('maturity-status', 'integration-complete')" class="text-center cursor-pointer">
+                            <div class="text-2xl font-bold text-green-600">✓ Complete</div>
+                            <div class="text-sm text-gray-600">Sentinel Integration</div>
+                        </div>
+                        <div onclick="trackProductInterest('maturity-status', 'cost-engine-complete')" class="text-center cursor-pointer">
+                            <div class="text-2xl font-bold text-green-600">✓ Complete</div>
+                            <div class="text-sm text-gray-600">Cost Optimization</div>
+                        </div>
+                        <div onclick="trackProductInterest('maturity-status', 'deployment-ready')" class="text-center cursor-pointer">
+                            <div class="text-2xl font-bold text-blue-600">→ SOW Phase</div>
+                            <div class="text-sm text-gray-600">MSP Integration</div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">
+                            Detailed technical specifications and implementation methodology available through SOW engagement
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MSP Partnership Model -->
+        <div class="bg-white rounded-2xl p-8 shadow-lg mb-16">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-4">Strategic MSP Partnership</h3>
+                    <p class="text-gray-600">
+                        Transform your MSP into the innovation leader offering the only proven 84-97% SIEM cost reduction solution.
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <strong>Co-branded Solution:</strong> LogiQore integrates as your proprietary capability
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <strong>Technical Transfer:</strong> Your team manages client deployments with our methodology
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <strong>Market Exclusivity:</strong> Protected territory for solution deployment
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <h4 class="font-semibold text-blue-900 mb-4">Technical Value-Add to Your Established Business</h4>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                <div class="text-blue-800">
+                                    <strong>Proprietary Architecture:</strong> 84-97% cost reduction through technical methodology unavailable elsewhere
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                <div class="text-blue-800">
+                                    <strong>Client-Specific Analysis:</strong> ROI calculations tailored to your existing portfolio through SOW engagement
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                <div class="text-blue-800">
+                                    <strong>Enhance Your Expertise:</strong> Technical capability that complements your market knowledge and client relationships
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white text-center">
+            <h2 class="text-3xl font-bold mb-4">Ready to Lead Your Market?</h2>
+            <p class="text-xl text-blue-100 mb-8 max-w-4xl mx-auto">
+                Join the exclusive group of MSPs offering the only proven enterprise SIEM cost solution. 
+                Available through structured SOW engagement only.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+                <a href="/public-calculator/" 
+                   onclick="trackPartnershipInquiry('portfolio-analysis', 'immediate'); trackCTA('calculate-portfolio-impact', 'calculator')"
+                   class="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-lg font-semibold text-lg transition-colors">
+                    Estimate Savings Potential
+                </a>
+                <button onclick="requestAuthenticatedAccess('/technical-deep-dive.html', 'technical-architecture'); trackCTA('explore-technical-details', 'technical-deep-dive')"
+                        class="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-colors">
+                   Request Partnership Qualification
+                </button>
+            </div>
+            
+            <div class="bg-white bg-opacity-10 rounded-lg p-6 max-w-2xl mx-auto">
+                <div class="text-blue-100 text-sm mb-2">
+                    <strong>Qualified Partner Engagement Only:</strong>
+                </div>
+                <div class="text-blue-200 text-sm mb-4">
+                    Evaluating select strategic MSSP partners with established Azure expertise and Sentinel portfolios. 
+                    Partnership requires technical qualification and structured SOW engagement.
+                </div>
+                <div class="text-xs text-blue-300">
+                    Discovery phase requires commercial investment • Full implementation through multi-phase SOW
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

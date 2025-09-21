@@ -1,0 +1,41 @@
+# Block direct access to client_engagement folder
+# Only allow authenticated users or specific referrers
+
+# Deny all by default
+Order Deny,Allow
+Deny from all
+
+# Allow access from your main domain only
+# Replace yourdomain.com with your actual domain
+Allow from env=allowed_referer
+
+# Set environment variable for allowed referrers
+# UAT domain
+SetEnvIf Referer "^https://calm-smoke-0171c8d03\.2\.azurestaticapps\.net" allowed_referer
+# Production domain
+SetEnvIf Referer "^https://(www\.)?logiqore\.co\.uk" allowed_referer
+SetEnvIf Referer "^https://logiqore\.co\.uk" allowed_referer
+
+# Alternative: Block direct access but allow authenticated users
+# Uncomment these lines if you want to use basic auth instead
+# AuthType Basic
+# AuthName "MSP Partner Access - Authentication Required"
+# AuthUserFile /path/to/.htpasswd
+# Require valid-user
+
+# Custom error page for blocked access
+ErrorDocument 403 /authentication_required.html
+
+# Security headers
+Header always set X-Frame-Options "DENY"
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Prevent indexing of protected content
+Header always set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+
+# Cache control for sensitive content
+Header always set Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
+Header always set Pragma "no-cache"
+Header always set Expires "0"

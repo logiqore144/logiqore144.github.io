@@ -1,0 +1,1936 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from "recharts";
+
+// Event Throughput Calculator v0.97 (Enterprise Staged Rollout + Full Integration)
+const ceilDiv = (a, b) => Math.ceil(a/b);
+const clamp = (n, min, max) => Math.min(Math.max(n,min),max);
+const toNum = (v) => { const n = Number(v); return Number.isFinite(n)&&n>=0?n:0; };
+const fmt = (n, d=3) => Number.isFinite(n)?n.toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d}):"-";
+const currencyGBP = (n) => Number.isFinite(n)?new Intl.NumberFormat(undefined,{style:"currency",currency:"GBP",maximumFractionDigits:2}).format(n):"-";
+
+function billableEventsPerMessage(messageBytes, chunkBytes=64*1024){
+  if(!Number.isFinite(messageBytes)||messageBytes<=0) return 0;
+  return Math.max(1, ceilDiv(messageBytes, chunkBytes));
+}
+
+function commitCost(tier, monthlyGB, monthDays){
+  const days = Math.max(1, monthDays);
+  const avgD = monthlyGB/days;
+  const overD = Math.max(0, avgD-tier.capGB);
+  const overMo = overD*days;
+  const base = tier.pricePerDayGBP*days;
+  const overGBP = overMo*tier.overageGBPPerGB;
+  return { avgDailyGB: avgD, monthlyOverageGB: overMo, baseGBP: base, overageGBP: overGBP, totalGBP: base+overGBP };
+}
+
+function adxColdGBMonths(avgDailyIngestGB, compressionRatio, retentionDays, hotCacheDays, monthDays){
+  const days = Math.max(1, monthDays);
+  const hot = Math.min(Math.max(0, hotCacheDays), Math.max(0, retentionDays));
+  const cold = Math.max(0, retentionDays-hot);
+  const storedPerDayGB = Math.max(0, avgDailyIngestGB) * Math.max(0, compressionRatio);
+  const coldGBMonths = (storedPerDayGB*cold)/days;
+  const hotGBMonths = (storedPerDayGB*hot)/days;
+  return {coldGBMonths,hotGBMonths,storedPerDayGB};
+}
+
+const styles = {
+  page: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 95%)',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    padding: '24px'
+  },
+  container: {
+    maxWidth: '1400px',
+    margin: '0 auto'
+  },
+  card: {
+    background: 'white',
+    borderRadius: '24px',
+    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+    border: '1px solid #e2e8f0',
+    padding: '24px',
+    marginBottom: '24px'
+  },
+  sectionTitle: {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#1e293b',
+    margin: '0 0 16px 0',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
+  },
+  dot: {
+    width: '12px',
+    height: '12px',
+    borderRadius: '50%'
+  },
+  grid4: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '16px',
+    marginBottom: '20px'
+  },
+  grid6: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+    marginBottom: '20px'
+  },
+  input: {
+    width: '75%',
+    border: '2px solid #e2e8f0',
+    borderRadius: '12px',
+    padding: '12px 16px',
+    fontSize: '16px',
+    fontWeight: '500',
+    outline: 'none'
+  },
+  select: {
+    width: '100%',
+    border: '2px solid #e2e8f0',
+    borderRadius: '12px',
+    padding: '12px 16px',
+    fontSize: '16px',
+    fontWeight: '500',
+    outline: 'none',
+    backgroundColor: 'white'
+  },
+  metricCard: {
+    background: '#f8fafc',
+    border: '1px solid #e2e8f0',
+    borderRadius: '16px',
+    padding: '20px',
+    textAlign: 'center'
+  },
+  metricCardAccent: {
+    background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 95%)',
+    border: '1px solid #3b82f6'
+  },
+  button: {
+    padding: '12px 24px',
+    borderRadius: '12px',
+    border: '2px solid #e2e8f0',
+    background: '#f8fafc',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer'
+  },
+  buttonActive: {
+    background: '#3b82f6',
+    color: 'white',
+    borderColor: '#3b82f6'
+  },
+  savingsHero: {
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 95%)',
+    borderRadius: '24px',
+    padding: '40px',
+    color: 'white',
+    boxShadow: '0 20px 40px rgba(16, 185, 129, 0.3)'
+  },
+  parallelRunWarning: {
+    background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 95%)',
+    borderRadius: '24px',
+    padding: '32px',
+    color: 'white',
+    boxShadow: '0 20px 40px rgba(220, 38, 38, 0.3)',
+    marginBottom: '24px'
+  }
+};
+
+export default function EventThroughputCalculator(){
+  const MONTH_ASSUMPTION_HRS = 730;
+  const LOG_LINE_BYTES_DEFAULT = 1024;
+  
+  const [useIEC, setUseIEC] = useState(false);
+  const [monthDays, setMonthDays] = useState(30);
+  const [periodMode, setPeriodMode] = useState("day");
+  const [periodValue, setPeriodValue] = useState(100);
+  const [periodUnit, setPeriodUnit] = useState("GB");
+  
+  // Enterprise Staging Controls
+  const [enterpriseStaging, setEnterpriseStaging] = useState(false);
+  const [stagingGraphMode, setStagingGraphMode] = useState('two-phase'); // 'two-phase' or 'simplified'
+  
+  const VOL_MULT = { GB:1e9, TB:1e12 };
+
+  const derivedEPS = useMemo(()=>{
+    const periodSeconds = periodMode==="day" ? 86400 : MONTH_ASSUMPTION_HRS*3600;
+    const bytesEntered = toNum(periodValue) * (VOL_MULT[periodUnit] ?? 1);
+    const eventsInPeriod = bytesEntered / LOG_LINE_BYTES_DEFAULT;
+    const epsCalc = eventsInPeriod / Math.max(1, periodSeconds);
+    return Math.floor(Math.max(0, epsCalc));
+  },[periodMode,periodValue,periodUnit]);
+
+  // Auto-trigger enterprise staging for large datasets - only show for >60GB/day
+  useEffect(() => {
+    const dataSize = toNum(periodValue);
+    const isLargeDataset = dataSize > 60 && periodUnit === "GB" && periodMode === "day";
+    
+    if (isLargeDataset && !enterpriseStaging) {
+      setEnterpriseStaging(true);
+    } else if (!isLargeDataset && enterpriseStaging) {
+      setEnterpriseStaging(false); // Auto-disable for smaller datasets
+    }
+  }, [periodValue, periodUnit, periodMode, enterpriseStaging]);
+
+  // EH inputs
+  const [batchEfficiencyPct, setBatchEfficiencyPct] = useState(50);
+  const [envelopeMaxSizeKB, setEnvelopeMaxSizeKB] = useState(64);
+  const [costPerMillionEvents, setCostPerMillionEvents] = useState(0.021);
+  const [tuIngressMBpsPerUnit, setTuIngressMBpsPerUnit] = useState(1);
+  const [tuIngressEventsPerSecPerUnit, setTuIngressEventsPerSecPerUnit] = useState(1000);
+  const [tuCostPerHour, setTuCostPerHour] = useState(0.023);
+  const [hoursPerMonth, setHoursPerMonth] = useState(MONTH_ASSUMPTION_HRS);
+
+  // Sentinel inputs
+  const [sentinelPricingMode, setSentinelPricingMode] = useState("payg");
+  const [autoSelectCheapest, setAutoSelectCheapest] = useState(true);
+  const [autoTierByVolume, setAutoTierByVolume] = useState(true);
+  const [showSentinelDetails, setShowSentinelDetails] = useState(false);
+  const [paygPricePerGB, setPaygPricePerGB] = useState(4.25);
+  const [sentinelPercentOfIngest, setSentinelPercentOfIngest] = useState(100);
+  const [sentinelUseOverride, setSentinelUseOverride] = useState(false);
+  const [sentinelMonthlyGBOverride, setSentinelMonthlyGBOverride] = useState(52.91);
+
+  const COMMIT = {
+    "100":{id:"100",capGB:100,pricePerDayGBP:292.30,overageGBPPerGB:2.923,label:"Commitment 100 GB/day"},
+    "200":{id:"200",capGB:200,pricePerDayGBP:541.15,overageGBPPerGB:2.7097,label:"Commitment 200 GB/day"},
+    "300":{id:"300",capGB:300,pricePerDayGBP:790.00,overageGBPPerGB:2.6307,label:"Commitment 300 GB/day"},
+    "400":{id:"400",capGB:400,pricePerDayGBP:1024.36,overageGBPPerGB:2.5596,label:"Commitment 400 GB/day"},
+    "500":{id:"500",capGB:500,pricePerDayGBP:1249.19,overageGBPPerGB:2.4964,label:"Commitment 500 GB/day"},
+    "1000":{id:"1000",capGB:1000,pricePerDayGBP:2449.00,overageGBPPerGB:2.449,label:"Commitment 1,000 GB/day"},
+    "2000":{id:"2000",capGB:2000,pricePerDayGBP:4740.00,overageGBPPerGB:2.370,label:"Commitment 2,000 GB/day"},
+    "5000":{id:"5000",capGB:5000,pricePerDayGBP:11405.62,overageGBPPerGB:2.283,label:"Commitment 5,000 GB/day"},
+    "10000":{id:"10000",capGB:10000,pricePerDayGBP:21962.00,overageGBPPerGB:2.196,label:"Commitment 10,000 GB/day"},
+    "25000":{id:"25000",capGB:25000,pricePerDayGBP:52781.88,overageGBPPerGB:2.109,label:"Commitment 25,000 GB/day"},
+    "50000":{id:"50000",capGB:50000,pricePerDayGBP:101317.50,overageGBPPerGB:2.030,label:"Commitment 50,000 GB/day"}
+  };
+  const [commitTierId, setCommitTierId] = useState("100");
+  const [commitDailyPriceGBP, setCommitDailyPriceGBP] = useState(COMMIT["100"].pricePerDayGBP);
+  const [commitOverageGBP, setCommitOverageGBP] = useState(COMMIT["100"].overageGBPPerGB);
+
+  // ADX inputs
+  const [adxPercentOfIngest, setAdxPercentOfIngest] = useState(100);
+  const [adxUseOverride, setAdxUseOverride] = useState(false);
+  const [adxMonthlyGBOverride, setAdxMonthlyGBOverride] = useState(52.91);
+  const [adxRetentionDays, setAdxRetentionDays] = useState(90);
+  const [adxHotCacheDays, setAdxHotCacheDays] = useState(14);
+  const [adxEngineNodes, setAdxEngineNodes] = useState(2);
+  const [adxEnginePricePerNodeHourGBP, setAdxEnginePricePerNodeHourGBP] = useState(0.543);
+  const [adxDMNodes, setAdxDMNodes] = useState(1);
+  const [adxDMPricePerNodeHourGBP, setAdxDMPricePerNodeHourGBP] = useState(0.333);
+  const [adxMarkupPerNodeHourGBP, setAdxMarkupPerNodeHourGBP] = useState(0.44);
+  const [adxStorageTransPricePerGBMonthGBP, setAdxStorageTransPricePerGBMonthGBP] = useState(1.066);
+  const [adxCompressionFactor, setAdxCompressionFactor] = useState(7);
+  const [adxAutoSelectEngines, setAdxAutoSelectEngines] = useState(true);
+  const [adxAutoEnvironment, setAdxAutoEnvironment] = useState(true);
+  const [adxEnvironment, setAdxEnvironment] = useState("prod");
+  const [adxDevThresholdGBPerDay, setAdxDevThresholdGBPerDay] = useState(80);
+  const [adxProdThresholdGBPerDay, setAdxProdThresholdGBPerDay] = useState(150);
+  const [adxDevPriceFactor, setAdxDevPriceFactor] = useState(0.6);
+
+  // VM inputs - Updated for Azure SKU model
+  const [vmTargetUtilizationPct, setVmTargetUtilizationPct] = useState(70);
+  const [vmOSDiskMonthlyGBP, setVmOSDiskMonthlyGBP] = useState(1.2);
+  const [vmDataDiskMonthlyGBP, setVmDataDiskMonthlyGBP] = useState(1.0);
+  const [vmIncludeDataDisk, setVmIncludeDataDisk] = useState(true);
+  const [vmEgressPricePerGB, setVmEgressPricePerGB] = useState(0);
+  const [vmEgressGBPerMonth, setVmEgressGBPerMonth] = useState(0);
+
+  // Build/BAU controls - Enhanced with parallel run settings
+  const [buildPhaseParallel, setBuildPhaseParallel] = useState(true);
+  const [buildPhaseWeeks, setBuildPhaseWeeks] = useState(1);
+  const [parallelRunMinWeeks, setParallelRunMinWeeks] = useState(2);
+  const [parallelRunMaxWeeks, setParallelRunMaxWeeks] = useState(6);
+  const [growthRatePct, setGrowthRatePct] = useState(3.0);
+
+  const MB_DIV = useIEC?1048576:1e6; 
+  const GB_DIV = useIEC?1073741824:1e9; 
+  const KB_MULT = useIEC?1024:1000;
+  const MB_LABEL = useIEC?"MiB":"MB"; 
+  const GB_LABEL = useIEC?"GiB":"GB"; 
+  const KB_LABEL = useIEC?"KiB":"kB";
+
+  const bytesPerEvent = LOG_LINE_BYTES_DEFAULT;
+  const eps = derivedEPS;
+
+  const totals = useMemo(()=>{
+    const e = toNum(eps); 
+    const bps = bytesPerEvent*e; 
+    const spd = 86400; 
+    const spm = spd*toNum(monthDays);
+    return { bytesPerSecond:bps, perMonthBytes:bps*spm, secondsPerMonth:spm, eps:e };
+  },[bytesPerEvent,eps,monthDays]);
+
+  const eh = useMemo(()=>{
+    const eff = clamp(toNum(batchEfficiencyPct)/100,0,1);
+    const cap = KB_MULT*toNum(envelopeMaxSizeKB);
+    const avgMsg = Math.max(0, Math.min(cap, cap*eff));
+    const msgsPerSec = avgMsg>0? Math.ceil(totals.bytesPerSecond/avgMsg) : 0;
+    const billablePerMsg = avgMsg>0? billableEventsPerMessage(avgMsg, 64*1024):0;
+    const ingressEventsPerSec = msgsPerSec * billablePerMsg;
+    const ingressEventsPerMonth = Math.ceil(ingressEventsPerSec * totals.secondsPerMonth);
+    const eventMillions = ingressEventsPerMonth/1_000_000;
+    const eventCostMonthly = eventMillions * toNum(costPerMillionEvents);
+    const inboundMBps = totals.bytesPerSecond / MB_DIV;
+    const tuByMB = inboundMBps>0 && toNum(tuIngressMBpsPerUnit)>0 ? Math.ceil(inboundMBps/toNum(tuIngressMBpsPerUnit)) : 0;
+    const tuByEvents = ingressEventsPerSec>0 && toNum(tuIngressEventsPerSecPerUnit)>0 ? Math.ceil(ingressEventsPerSec/toNum(tuIngressEventsPerSecPerUnit)) : 0;
+    const tuRequired = Math.max(tuByMB, tuByEvents);
+    const bottleneck = tuByMB>=tuByEvents?"mb":"events";
+    const tuMonthlyCost = tuRequired * toNum(tuCostPerHour) * toNum(hoursPerMonth);
+    return {avgMessageBytes:avgMsg,messagesPerSecond:msgsPerSec,ingressEventsPerMonth,eventCostMonthly,tuByMB,tuByIngressEvents:tuByEvents,tuRequired,bottleneck,tuMonthlyCost};
+  },[batchEfficiencyPct,envelopeMaxSizeKB,totals,MB_DIV,KB_MULT,costPerMillionEvents,tuIngressMBpsPerUnit,tuIngressEventsPerSecPerUnit,tuCostPerHour,hoursPerMonth]);
+
+  const sentinelPayg = useMemo(()=>{
+    const pct = clamp(toNum(sentinelPercentOfIngest)/100,0,1);
+    const monthlyGB = (totals.perMonthBytes*pct)/GB_DIV;
+    const usedGB = sentinelUseOverride? Math.max(0,toNum(sentinelMonthlyGBOverride)) : monthlyGB;
+    return { monthlyGB: usedGB, monthlyCostGBP: usedGB*toNum(paygPricePerGB) };
+  },[sentinelPercentOfIngest,totals.perMonthBytes,GB_DIV,sentinelUseOverride,sentinelMonthlyGBOverride,paygPricePerGB]);
+
+  // Function to find best Sentinel tier for a given volume
+  const findBestSentinelTier = (monthlyGB) => {
+    const paygCost = monthlyGB * toNum(paygPricePerGB);
+    let bestTier = {id:"payg", capGB:Infinity, pricePerDayGBP:0, overageGBPPerGB:toNum(paygPricePerGB), label:"PAYG"};
+    let bestCost = paygCost;
+    
+    Object.values(COMMIT).forEach(tier => {
+      const avgDaily = monthlyGB / toNum(monthDays);
+      const overDaily = Math.max(0, avgDaily - tier.capGB);
+      const overMonthly = overDaily * toNum(monthDays);
+      const baseCost = tier.pricePerDayGBP * toNum(monthDays);
+      const overageCost = overMonthly * tier.overageGBPPerGB;
+      const totalCost = baseCost + overageCost;
+      
+      if (totalCost < bestCost) {
+        bestTier = {...tier, label: tier.id === "100" ? "100GB" : tier.id === "200" ? "200GB" : tier.id === "300" ? "300GB" : tier.id === "400" ? "400GB" : tier.id === "500" ? "500GB" : tier.id === "1000" ? "1000GB" : tier.id === "2000" ? "2000GB" : tier.id === "5000" ? "5000GB" : tier.id === "10000" ? "10000GB" : tier.id === "25000" ? "25000GB" : "50000GB"};
+        bestCost = totalCost;
+      }
+    });
+    
+    return { tier: bestTier, cost: bestCost };
+  };
+
+  const tierData = (id) => id===commitTierId? { ...COMMIT[id], pricePerDayGBP:toNum(commitDailyPriceGBP), overageGBPPerGB:toNum(commitOverageGBP)} : COMMIT[id];
+  const [selectedCommit, setSelectedCommit] = useState(()=>commitCost(COMMIT["100"],0,30));
+
+  useEffect(()=>{
+    const monthlyGB = sentinelPayg.monthlyGB;
+    const days = Math.max(1, toNum(monthDays));
+    const avgDaily = monthlyGB / days;
+
+    if (autoTierByVolume) {
+      const tiers = Object.values(COMMIT).sort((a,b)=>a.capGB-b.capGB);
+      const chosen = tiers.find(t=>avgDaily <= t.capGB) || tiers[tiers.length-1];
+      if (commitTierId !== chosen.id) setCommitTierId(chosen.id);
+    }
+
+    const resFor = (id) => { const t = tierData(id); return {id, label:t.label, ...commitCost(t, monthlyGB, days)}; };
+    const cands = Object.keys(COMMIT).map(resFor);
+    const best = cands.reduce((b,x)=> x.totalGBP<b.totalGBP?x:b, cands[0]);
+
+    if (autoSelectCheapest) {
+      const payg = sentinelPayg.monthlyCostGBP;
+      const commitIsCheaper = best.totalGBP + 0.01 < payg;
+      setSentinelPricingMode(commitIsCheaper ? "commit" : "payg");
+    }
+
+    setSelectedCommit(resFor(commitTierId));
+  },[autoSelectCheapest,autoTierByVolume,commitTierId,commitDailyPriceGBP,commitOverageGBP,monthDays,sentinelPayg.monthlyGB,sentinelPayg.monthlyCostGBP]);
+  
+  const sentinelMonthlyGBP = sentinelPricingMode==="payg"? sentinelPayg.monthlyCostGBP : selectedCommit.totalGBP;
+
+  const sentinelCommitRows = useMemo(()=>{
+    const monthlyGB = sentinelPayg.monthlyGB;
+    const rows = Object.keys(COMMIT).map((id)=>{
+      const t = COMMIT[id];
+      const r = commitCost(t, monthlyGB, toNum(monthDays));
+      return { id, label: t.label, capGB: t.capGB, pricePerDayGBP: t.pricePerDayGBP, overageGBPPerGB: t.overageGBPPerGB, ...r };
+    });
+    const cheapest = rows.reduce((b,x)=> x.totalGBP<b.totalGBP?x:b, rows[0]);
+    return { rows, cheapestId: cheapest.id };
+  },[COMMIT, sentinelPayg.monthlyGB, monthDays]);
+
+  const adx = useMemo(()=>{
+    const pct = clamp(toNum(adxPercentOfIngest)/100,0,1);
+    const monthlyGBraw = (totals.perMonthBytes*pct)/GB_DIV;
+    const monthlyGB = adxUseOverride?Math.max(0,toNum(adxMonthlyGBOverride)):monthlyGBraw;
+    const avgDailyGB = toNum(monthDays)>0 ? monthlyGB/toNum(monthDays) : 0;
+    const compressionRatio = 1/Math.max(1,toNum(adxCompressionFactor));
+    const {coldGBMonths,hotGBMonths,storedPerDayGB} = adxColdGBMonths(avgDailyGB,compressionRatio,toNum(adxRetentionDays),Math.min(toNum(adxHotCacheDays),toNum(adxRetentionDays)),toNum(monthDays));
+    const recEngine = Math.max(1, Math.ceil(avgDailyGB/800));
+    const recDM = Math.max(1, Math.ceil(recEngine/2));
+    const effEngine = adxAutoSelectEngines?recEngine:Math.max(0,toNum(adxEngineNodes));
+    const effDM = adxAutoSelectEngines?recDM:Math.max(0,toNum(adxDMNodes));
+    let env = adxEnvironment;
+    if(adxAutoEnvironment){ 
+      if(env==="prod" && avgDailyGB<=toNum(adxDevThresholdGBPerDay)) env="devtest"; 
+      if(env==="devtest" && avgDailyGB>=toNum(adxProdThresholdGBPerDay)) env="prod"; 
+    }
+    const factor = env==="devtest"? toNum(adxDevPriceFactor):1;
+    const engineGBP = toNum(adxEnginePricePerNodeHourGBP)*factor*effEngine*toNum(hoursPerMonth);
+    const dmGBP = toNum(adxDMPricePerNodeHourGBP)*factor*effDM*toNum(hoursPerMonth);
+    const markupGBP = env==="devtest" ? 0 : toNum(adxMarkupPerNodeHourGBP)*(effEngine+effDM)*toNum(hoursPerMonth);
+    const storageGBP = coldGBMonths * toNum(adxStorageTransPricePerGBMonthGBP);
+
+    // Enterprise staging calculation - INCREASES cost during parallel phase
+    let totalGBP = engineGBP + dmGBP + markupGBP + storageGBP;
+    let stagingSavings = 0; // Track how much staging saves vs full parallel from day 1
+    
+    if (enterpriseStaging) {
+      const fullParallelCost = totalGBP; // What full parallel would cost
+      
+      if (stagingGraphMode === 'two-phase') {
+        // 3 weeks at 25% load, then full load - this is LESS than full parallel from day 1
+        const throttledWeeksCost = (totalGBP / 4.33) * 3 * 0.25; // 3 weeks at 25%
+        const fullWeeksCost = (totalGBP / 4.33) * 1.33; // remaining 1.33 weeks at 95%
+        totalGBP = throttledWeeksCost + fullWeeksCost;
+        stagingSavings = fullParallelCost - totalGBP; // Positive number = savings
+      } else {
+        // Simplified 70% average throughout - less than 95% parallel
+        const newCost = totalGBP * 0.7;
+        stagingSavings = totalGBP - newCost;
+        totalGBP = newCost;
+      }
+    }
+
+    return { 
+      env, monthlyGB, avgDailyGB, coldGBMonths, hotGBMonths, storedPerDayGB, 
+      engineMonthlyGBP:engineGBP, dmMonthlyGBP:dmGBP, markupMonthlyGBP:markupGBP, 
+      storageMonthlyGBP:storageGBP, totalGBP, stagingSavings,
+      effectiveEngineNodes:effEngine, effectiveDMNodes:effDM 
+    };
+  },[adxPercentOfIngest,totals.perMonthBytes,GB_DIV,adxUseOverride,adxMonthlyGBOverride,monthDays,adxCompressionFactor,adxRetentionDays,adxHotCacheDays,adxEnginePricePerNodeHourGBP,adxEngineNodes,adxDMPricePerNodeHourGBP,adxDMNodes,adxMarkupPerNodeHourGBP,hoursPerMonth,adxStorageTransPricePerGBMonthGBP,adxAutoSelectEngines,adxAutoEnvironment,adxEnvironment,adxDevThresholdGBPerDay,adxProdThresholdGBPerDay,adxDevPriceFactor,enterpriseStaging,stagingGraphMode]);
+  
+  useEffect(()=>{ 
+    if(adxAutoEnvironment && adx.env!==adxEnvironment) setAdxEnvironment(adx.env); 
+  },[adxAutoEnvironment,adx.env]);
+
+  const vm = useMemo(()=>{
+    // Azure VM SKU definitions with real-world tested performance
+    const AZURE_VM_SKUS = [
+      {name: "B2s", vcpus: 2, ram_gb: 4, hourly_gbp: 0.0416, max_eps_70pct: 14000},
+      {name: "D2as_v5", vcpus: 2, ram_gb: 8, hourly_gbp: 0.096, max_eps_70pct: 14000}, 
+      {name: "D4as_v5", vcpus: 4, ram_gb: 16, hourly_gbp: 0.192, max_eps_70pct: 28000},
+      {name: "D8as_v5", vcpus: 8, ram_gb: 32, hourly_gbp: 0.384, max_eps_70pct: 56000},
+      {name: "D16as_v5", vcpus: 16, ram_gb: 64, hourly_gbp: 0.768, max_eps_70pct: 112000}
+    ];
+    
+    // Based on real-world testing: 1 vCPU = 10,000 EPS at 95% utilization
+    const EPS_PER_VCPU_MAX = 10000;
+    const targetUtil = Math.max(0.05, Math.min(1, toNum(vmTargetUtilizationPct) / 100));
+    
+    // Find optimal SKU for the EPS requirement
+    let selectedSKU = AZURE_VM_SKUS[AZURE_VM_SKUS.length - 1]; // Default to largest
+    for (const sku of AZURE_VM_SKUS) {
+      if (eps <= sku.max_eps_70pct) {
+        selectedSKU = sku;
+        break;
+      }
+    }
+    
+    // Calculate actual CPU utilization
+    const cpuUtilization = Math.min(100, (eps / (selectedSKU.vcpus * EPS_PER_VCPU_MAX)) * 100);
+    const computeGBP = selectedSKU.hourly_gbp * toNum(hoursPerMonth);
+    const disksPerInst = toNum(vmOSDiskMonthlyGBP) + (vmIncludeDataDisk ? toNum(vmDataDiskMonthlyGBP) : 0);
+    const egressGBP = toNum(vmEgressPricePerGB) * toNum(vmEgressGBPerMonth);
+    
+    return {
+      skuName: selectedSKU.name,
+      vcpus: selectedSKU.vcpus,
+      ramGB: selectedSKU.ram_gb,
+      cpuUtilization: cpuUtilization,
+      maxCapacityEPS: selectedSKU.max_eps_70pct,
+      computeMonthlyGBP: computeGBP,
+      disksMonthlyGBP: disksPerInst,
+      egressMonthlyGBP: egressGBP,
+      totalGBP: computeGBP + disksPerInst + egressGBP,
+      confidence: eps <= selectedSKU.max_eps_70pct ? "High - Real-world tested" : "Medium - Extrapolated"
+    };
+  },[eps, vmTargetUtilizationPct, hoursPerMonth, vmOSDiskMonthlyGBP, vmDataDiskMonthlyGBP, vmIncludeDataDisk, vmEgressPricePerGB, vmEgressGBPerMonth]);
+
+  // Enhanced Growth impact analysis with 36-month extended view
+  const growthAnalysis = useMemo(() => {
+    const growthRate = toNum(growthRatePct) / 100;
+    if (growthRate <= 0) return null;
+    
+    const currentGBPerDay = (totals.perMonthBytes / GB_DIV) / toNum(monthDays);
+    
+    // Extended analysis: detailed months 1-12, then snapshots at 18, 24, 30, 36
+    const detailedMonths = Array.from({length: 12}, (_, i) => i + 1);
+    const snapshotMonths = [18, 24, 30, 36];
+    const allMonths = [...detailedMonths, ...snapshotMonths];
+    
+    const analysis = [];
+    let cumulativeSavings = 0;
+    let cumulativeROI = 0;
+    
+    // Use the MAX value from the parallel run range (worst case scenario)
+    const parallelRunWeeks = buildPhaseParallel ? toNum(parallelRunMaxWeeks) : 0;
+    const parallelRunDays = parallelRunWeeks * 7;
+    const parallelRunMonths = Math.ceil(parallelRunDays / toNum(monthDays));
+    
+    for (const month of allMonths) {
+      const gbPerDay = currentGBPerDay * Math.pow(1 + growthRate, month - 1);
+      const monthlyGB = gbPerDay * toNum(monthDays);
+      
+      // Calculate Sentinel cost for this volume
+      const { tier: bestTier, cost: sentinelCost } = findBestSentinelTier(monthlyGB);
+      
+      // Recalculate LogiQore costs for this volume
+      const avgDailyGB = gbPerDay;
+      
+      // ADX cost recalculation
+      const compressionRatio = 1 / Math.max(1, toNum(adxCompressionFactor));
+      const storedPerDayGB = avgDailyGB * compressionRatio;
+      const hotDays = Math.min(toNum(adxHotCacheDays), toNum(adxRetentionDays));
+      const coldDays = Math.max(0, toNum(adxRetentionDays) - hotDays);
+      const coldGBMonths = (storedPerDayGB * coldDays) / toNum(monthDays);
+      
+      const recEngine = Math.max(1, Math.ceil(avgDailyGB / 800));
+      const recDM = Math.max(1, Math.ceil(recEngine / 2));
+      
+      let env = toNum(adxDevThresholdGBPerDay) > 0 && avgDailyGB <= toNum(adxDevThresholdGBPerDay) ? "devtest" : "prod";
+      
+      const factor = env === "devtest" ? toNum(adxDevPriceFactor) : 1;
+      const engineGBP = toNum(adxEnginePricePerNodeHourGBP) * factor * recEngine * toNum(hoursPerMonth);
+      const dmGBP = toNum(adxDMPricePerNodeHourGBP) * factor * recDM * toNum(hoursPerMonth);
+      const markupGBP = env === "devtest" ? 0 : toNum(adxMarkupPerNodeHourGBP) * (recEngine + recDM) * toNum(hoursPerMonth);
+      const storageGBP = coldGBMonths * toNum(adxStorageTransPricePerGBMonthGBP);
+      let adxTotal = engineGBP + dmGBP + markupGBP + storageGBP;
+      
+      // Apply enterprise staging if enabled
+      if (enterpriseStaging) {
+        if (stagingGraphMode === 'two-phase') {
+          const throttledWeeksCost = (adxTotal / 4.33) * 3 * 0.25;
+          const fullWeeksCost = (adxTotal / 4.33) * 1.33;
+          adxTotal = throttledWeeksCost + fullWeeksCost;
+        } else {
+          adxTotal = adxTotal * 0.7;
+        }
+      }
+      
+      // VM cost (scaled for higher volumes)
+      let vmTotal = vm.totalGBP;
+      if (eps > 14000) { // Would need more than B2s
+        vmTotal *= Math.max(1, Math.ceil(eps / 14000));
+      }
+      
+      // EH cost scales with volume
+      const ehTotal = eh.eventCostMonthly + eh.tuMonthlyCost;
+      
+      const logiQoreCost = ehTotal + adxTotal + vmTotal;
+      const monthlySavings = Math.max(0, sentinelCost - logiQoreCost);
+      
+      // Calculate parallel run impact based on actual duration
+      let adjustedSavings = monthlySavings;
+      let parallelRunCost = 0;
+      let isParallelRunMonth = false;
+      
+      if (buildPhaseParallel && month <= parallelRunMonths) {
+        isParallelRunMonth = true;
+        
+        // Calculate what portion of this month is parallel run
+        let parallelDaysInMonth;
+        if (month === parallelRunMonths && parallelRunDays < (month * toNum(monthDays))) {
+          // Last month of parallel run - only partial month
+          const totalParallelDays = parallelRunDays;
+          const fullMonthsBefore = month - 1;
+          const daysInPreviousMonths = fullMonthsBefore * toNum(monthDays);
+          parallelDaysInMonth = Math.max(0, totalParallelDays - daysInPreviousMonths);
+        } else {
+          // Full month is parallel run
+          parallelDaysInMonth = toNum(monthDays);
+        }
+        
+        const parallelProration = Math.min(1, parallelDaysInMonth / toNum(monthDays));
+        
+        // During parallel run, you pay BOTH Sentinel AND LogiQore for that portion
+        const parallelExtraCost = sentinelCost * parallelProration;
+        parallelRunCost = (sentinelCost + logiQoreCost) * parallelProration;
+        
+        // Adjusted savings = normal savings - extra cost during parallel period
+        adjustedSavings = monthlySavings - parallelExtraCost;
+      }
+      
+      cumulativeSavings += adjustedSavings;
+      cumulativeROI += adjustedSavings;
+      
+      const prevMonth = analysis.length > 0 ? analysis[analysis.length - 1] : null;
+      const environmentChange = prevMonth && prevMonth.environment !== env;
+      const tierJump = prevMonth && Math.abs(sentinelCost - prevMonth.sentinelCost) > 1000;
+      
+      analysis.push({
+        month,
+        gbPerDay: gbPerDay,
+        sentinelCost,
+        sentinelTier: bestTier.label,
+        logiQoreCost,
+        monthlySavings,
+        adjustedSavings,
+        parallelRunCost,
+        isParallelRunMonth,
+        cumulativeSavings,
+        cumulativeROI,
+        environment: env,
+        environmentChange,
+        tierJump,
+        isSnapshot: snapshotMonths.includes(month)
+      });
+    }
+    
+    // Calculate payback period considering accumulated parallel run "debt"
+    let paybackMonth = parallelRunMonths + 1; // Cannot be positive until after parallel run ends
+    let runningROI = 0;
+    
+    // First, accumulate all the "debt" from parallel run months
+    let totalDebt = 0;
+    for (let i = 0; i < Math.min(parallelRunMonths, analysis.length); i++) {
+      if (analysis[i].adjustedSavings < 0) {
+        totalDebt += Math.abs(analysis[i].adjustedSavings);
+      }
+    }
+    
+    // Then find when the positive cash flow pays off the debt
+    for (let i = parallelRunMonths; i < analysis.length; i++) {
+      const row = analysis[i];
+      runningROI += row.adjustedSavings;
+      if (runningROI > totalDebt) {
+        paybackMonth = row.month;
+        break;
+      }
+    }
+    
+    // If we never break even in 36 months, set to 36+
+    if (runningROI <= totalDebt) paybackMonth = 36;
+    
+    return { 
+      data: analysis, 
+      detailedData: analysis.filter(row => !row.isSnapshot),
+      snapshotData: analysis.filter(row => row.isSnapshot),
+      paybackMonth, 
+      parallelRunMonths,
+      parallelRunWeeks: parallelRunWeeks,
+      totalDebt: totalDebt
+    };
+  }, [totals.perMonthBytes, GB_DIV, monthDays, growthRatePct, paygPricePerGB, COMMIT, adxCompressionFactor, adxRetentionDays, adxHotCacheDays, adxEnginePricePerNodeHourGBP, adxDMPricePerNodeHourGBP, adxMarkupPerNodeHourGBP, adxStorageTransPricePerGBMonthGBP, adxDevThresholdGBPerDay, adxDevPriceFactor, hoursPerMonth, buildPhaseParallel, parallelRunMaxWeeks, parallelRunMinWeeks, eh, vm, findBestSentinelTier, enterpriseStaging, stagingGraphMode]);
+
+  const cost = {
+    ehEvents: eh.eventCostMonthly, ehTU: eh.tuMonthlyCost,
+    sentinel: sentinelMonthlyGBP,
+    adxEngine: adx.engineMonthlyGBP, adxDM: adx.dmMonthlyGBP, adxMarkup: adx.markupMonthlyGBP, adxStorage: adx.storageMonthlyGBP,
+    vmCompute: vm.computeMonthlyGBP, vmDisks: vm.disksMonthlyGBP, vmEgress: vm.egressMonthlyGBP,
+  };
+  const logiQoreStackMonthlyGBP = (cost.ehEvents+cost.ehTU) + adx.totalGBP + vm.totalGBP;
+
+  const analyticsLogiQore = adx.totalGBP + vm.totalGBP;
+  const analyticsSentinel = sentinelMonthlyGBP;
+  const savingMonthly = Math.max(0, analyticsSentinel - analyticsLogiQore);
+  const savingPct = analyticsSentinel>0 ? (savingMonthly/analyticsSentinel)*100 : 0;
+
+  const parallelMonthly = sentinelMonthlyGBP + logiQoreStackMonthlyGBP;
+  const proration = (toNum(buildPhaseWeeks)*7)/Math.max(1,toNum(monthDays));
+  const buildPhaseProratedGBP = parallelMonthly * proration;
+  const currentModeMonthlyTotal = buildPhaseParallel ? parallelMonthly : logiQoreStackMonthlyGBP;
+
+  // Calculate cost per day of delay
+  const avgDailySavings = growthAnalysis ? 
+    (growthAnalysis.data[growthAnalysis.data.length-1]?.cumulativeSavings || 0) / (12 * toNum(monthDays)) :
+    savingMonthly / toNum(monthDays);
+
+  const r = toNum(growthRatePct)/100;
+  const grow = (m) => savingMonthly * (r===0? m : ((Math.pow(1+r,m)-1)/r));
+  const saveQtr = grow(3), saveYr = grow(12), save3Yr = grow(36);
+
+  // Get data size for auto-trigger check
+  const dataSize = periodMode === "day" && periodUnit === "GB" ? toNum(periodValue) : 0;
+
+  return (
+    <div style={styles.page}>
+      <div style={styles.container}>
+        
+        {/* Header */}
+        <div style={styles.card}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <div>
+              <h1 style={{fontSize: '32px', fontWeight: '700', color: '#1e293b', margin: 0}}>Event Throughput Calculator</h1>
+              <p style={{fontSize: '16px', color: '#64748b', margin: '4px 0 0 0'}}>v0.97 • Enterprise Staged Rollout + Full Integration</p>
+            </div>
+            <div style={{textAlign: 'right', fontSize: '12px', color: '#64748b'}}>
+              <div>Assumes <strong>730 h/month</strong></div>
+              <div>1 event = <strong>1,024 bytes</strong></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Data Throughput */}
+        <div style={styles.card}>
+          <h2 style={{...styles.sectionTitle}}>
+            <div style={{...styles.dot, background: '#3b82f6'}}></div>
+            Data Throughput
+          </h2>
+          <p style={{fontSize: '14px', color: '#64748b', marginBottom: '20px'}}>
+            Enter volume & period. EPS is derived assuming 1 event = 1,024 bytes. Month = 730 hours.
+          </p>
+          
+          <div style={styles.grid4}>
+            <div style={{background: '#f1f5f9', borderRadius: '16px', padding: '20px'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>Volume</label>
+              <input 
+                type="number" 
+                style={{...styles.input, fontSize: '18px', fontWeight: '600'}}
+                min={0} 
+                step={0.01} 
+                value={periodValue} 
+                onChange={e=>setPeriodValue(toNum(e.target.value))} 
+              />
+            </div>
+            <div style={{background: '#f1f5f9', borderRadius: '16px', padding: '20px'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>Unit</label>
+              <select style={styles.select} value={periodUnit} onChange={e=>setPeriodUnit(e.target.value)}>
+                <option value="GB">GB</option>
+                <option value="TB">TB</option>
+              </select>
+            </div>
+            <div style={{background: '#f1f5f9', borderRadius: '16px', padding: '20px'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>Period</label>
+              <select style={styles.select} value={periodMode} onChange={e=>setPeriodMode(e.target.value)}>
+                <option value="day">per day</option>
+                <option value="month">per month</option>
+              </select>
+            </div>
+            <div style={{background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 95%)', borderRadius: '16px', padding: '20px', color: 'white', textAlign: 'center'}}>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', opacity: 0.9}}>Derived EPS</label>
+              <div style={{fontSize: '28px', fontWeight: '700'}}>{derivedEPS.toLocaleString()}</div>
+            </div>
+          </div>
+
+          {/* Enterprise Staged Rollout Section - Only show for >60GB/day */}
+          {dataSize > 60 && (
+            <div style={{
+              background: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 95%)', 
+              padding: '24px', 
+              borderRadius: '20px', 
+              border: '2px solid #ec4899',
+              marginTop: '24px'
+            }}>
+              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px'}}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                  <div style={{fontSize: '28px'}}>🛡️</div>
+                  <div>
+                    <h3 style={{fontSize: '20px', fontWeight: '700', color: '#be185d', margin: 0}}>
+                      Enterprise Staged Rollout
+                    </h3>
+                    <p style={{fontSize: '14px', color: '#a21caf', margin: '4px 0 0 0'}}>
+                      Recommended for large datasets (&gt;60GB) • Risk mitigation strategy
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEnterpriseStaging(!enterpriseStaging)}
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    ...(enterpriseStaging 
+                      ? {background: '#ec4899', color: 'white'} 
+                      : {background: 'white', color: '#ec4899', border: '2px solid #ec4899'}
+                    )
+                  }}
+                >
+                  {enterpriseStaging ? 'Enabled' : 'Enable'}
+                </button>
+              </div>
+              
+              {enterpriseStaging && (
+                <div style={{marginTop: '20px'}}>
+                  <div style={{
+                    background: 'white', 
+                    padding: '20px', 
+                    borderRadius: '16px', 
+                    border: '1px solid #f3e8ff',
+                    marginBottom: '20px'
+                  }}>
+                    <h4 style={{fontSize: '16px', fontWeight: '600', color: '#7c2d12', marginBottom: '16px'}}>
+                      Why Enterprise Staging Matters for CTOs & CFOs
+                    </h4>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px'}}>
+                      <div style={{display: 'flex', alignItems: 'start', gap: '12px'}}>
+                        <div style={{fontSize: '20px', color: '#16a34a'}}>📈</div>
+                        <div>
+                          <div style={{fontSize: '14px', fontWeight: '600', color: '#16a34a', marginBottom: '4px'}}>
+                            ADX Cost Cliff Mitigation
+                          </div>
+                          <div style={{fontSize: '12px', color: '#64748b'}}>
+                            Throttled validation prevents massive parallel run costs during enterprise migration
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{display: 'flex', alignItems: 'start', gap: '12px'}}>
+                        <div style={{fontSize: '20px', color: '#2563eb'}}>✅</div>
+                        <div>
+                          <div style={{fontSize: '14px', fontWeight: '600', color: '#2563eb', marginBottom: '4px'}}>
+                            Reduced Risk Validation Period
+                          </div>
+                          <div style={{fontSize: '12px', color: '#64748b'}}>
+                            3-week throttled period validates queries & performance before full production load
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{display: 'flex', alignItems: 'start', gap: '12px'}}>
+                        <div style={{fontSize: '20px', color: '#7c3aed'}}>📊</div>
+                        <div>
+                          <div style={{fontSize: '14px', fontWeight: '600', color: '#7c3aed', marginBottom: '4px'}}>
+                            Scales Demonstration Value
+                          </div>
+                          <div style={{fontSize: '12px', color: '#64748b'}}>
+                            Shows cost optimization strategy & executive oversight to stakeholders
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style={{display: 'flex', gap: '16px'}}>
+                    <button
+                      onClick={() => setStagingGraphMode('two-phase')}
+                      style={{
+                        flex: 1,
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: '2px solid',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.2s ease',
+                        ...(stagingGraphMode === 'two-phase'
+                          ? {
+                            background: '#fdf2f8',
+                            borderColor: '#ec4899',
+                            color: '#be185d'
+                          }
+                          : {
+                            background: 'white',
+                            borderColor: '#e5e7eb',
+                            color: '#374151'
+                          }
+                        )
+                      }}
+                    >
+                      <div style={{fontSize: '16px', fontWeight: '600', marginBottom: '4px'}}>
+                        Option A: Two-Phase Graph
+                      </div>
+                      <div style={{fontSize: '12px', opacity: 0.8}}>
+                        Shows throttled costs (weeks 1-3) vs full costs (week 4+). More complex but demonstrates real staging benefit.
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setStagingGraphMode('simplified')}
+                      style={{
+                        flex: 1,
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: '2px solid',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.2s ease',
+                        ...(stagingGraphMode === 'simplified'
+                          ? {
+                            background: '#fdf2f8',
+                            borderColor: '#ec4899',
+                            color: '#be185d'
+                          }
+                          : {
+                            background: 'white',
+                            borderColor: '#e5e7eb',
+                            color: '#374151'
+                          }
+                        )
+                      }}
+                    >
+                      <div style={{fontSize: '16px', fontWeight: '600', marginBottom: '4px'}}>
+                        Option B: Simplified Average
+                      </div>
+                      <div style={{fontSize: '12px', opacity: 0.8}}>
+                        Shows blended 70% parallel run costs throughout. Cleaner presentation but hides staging strategy.
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Growth Parameters - Integrated into Data Throughput section */}
+          <div style={{marginTop: '24px', padding: '24px', background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 75%)', borderRadius: '20px', border: '2px solid #e2e8f0'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px'}}>
+              <div style={{...styles.dot, background: '#f59e0b'}}></div>
+              <h3 style={{fontSize: '18px', fontWeight: '600', color: '#1e293b', margin: 0}}>Growth Parameters</h3>
+              <span style={{
+                padding: '4px 8px',
+                borderRadius: '8px',
+                fontSize: '11px',
+                fontWeight: '600',
+                background: '#fef3c7',
+                color: '#d97706'
+              }}>
+                Optional
+              </span>
+            </div>
+            <p style={{fontSize: '14px', color: '#64748b', marginBottom: '20px'}}>
+              <strong>For CFOs & Finance Teams:</strong> Configure compound annual growth rate (CAGR) for comprehensive 36-month ROI analysis. 
+              Log volume growth typically mirrors business growth - as customers, transactions, and platform usage expand, 
+              observability costs compound. LogiQore's linear cost scaling vs. Sentinel's tier-based pricing creates exponential savings advantages.
+              {buildPhaseParallel && growthAnalysis && (
+                <>
+                  <br /><br />
+                  <strong>Implementation Investment:</strong> Parallel run periods are standard practice for mission-critical migrations. 
+                  The {parallelRunMinWeeks}-{parallelRunMaxWeeks} week overlap creates temporary dual costs but ensures zero-risk transition. 
+                  ROI realization begins Month {growthAnalysis.paybackMonth}, with delivery speed directly impacting payback timeline. 
+                  Accelerated implementation reduces investment debt and maximizes savings capture.
+                </>
+              )}
+            </p>
+            
+            <div style={styles.grid4}>
+              <div style={{background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0'}}>
+                <label style={{display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>
+                  Monthly Growth Rate (%) - CAGR
+                </label>
+                <input 
+                  type="number" 
+                  style={{...styles.input, fontSize: '18px', fontWeight: '600', textAlign: 'center'}}
+                  min={0} 
+                  max={50}
+                  step={0.1} 
+                  value={growthRatePct} 
+                  onChange={e=>setGrowthRatePct(toNum(e.target.value))} 
+                />
+                <div style={{fontSize: '12px', color: '#64748b', marginTop: '4px', textAlign: 'center'}}>
+                  {growthRatePct > 0 ? `${(Math.pow(1 + growthRatePct/100, 12) * 100 - 100).toFixed(1)}% CAGR` : 'No growth'}
+                </div>
+              </div>
+              <div style={{background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0'}}>
+                <label style={{display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>
+                  Build Phase Duration (weeks)
+                </label>
+                <input 
+                  type="number" 
+                  style={{...styles.input, fontSize: '18px', fontWeight: '600', textAlign: 'center'}}
+                  min={1} 
+                  max={20}
+                  step={1} 
+                  value={buildPhaseWeeks} 
+                  onChange={e=>setBuildPhaseWeeks(toNum(e.target.value))} 
+                />
+                <div style={{fontSize: '12px', color: '#64748b', marginTop: '4px', textAlign: 'center'}}>
+                  Implementation timeline
+                </div>
+              </div>
+              <div style={{background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0'}}>
+                <label style={{display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>
+                  Parallel Run Duration (weeks)
+                </label>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
+                  <input 
+                    type="number" 
+                    style={{...styles.input, fontSize: '16px', fontWeight: '600', textAlign: 'center', flex: 1}}
+                    min={1} 
+                    max={20}
+                    step={1} 
+                    value={parallelRunMinWeeks} 
+                    onChange={e=>setParallelRunMinWeeks(toNum(e.target.value))} 
+                  />
+                  <span style={{fontSize: '14px', color: '#64748b'}}>to</span>
+                  <input 
+                    type="number" 
+                    style={{...styles.input, fontSize: '16px', fontWeight: '600', textAlign: 'center', flex: 1}}
+                    min={parallelRunMinWeeks} 
+                    max={48}
+                    step={1} 
+                    value={parallelRunMaxWeeks} 
+                    onChange={e=>setParallelRunMaxWeeks(toNum(e.target.value))} 
+                  />
+                </div>
+                <div style={{fontSize: '12px', color: '#64748b', textAlign: 'center'}}>
+                  Risk mitigation period
+                </div>
+              </div>
+              <div style={{background: 'linear-gradient(135deg, #10b981 0%, #059669 95%)', borderRadius: '16px', padding: '20px', color: 'white', textAlign: 'center'}}>
+                <div style={{fontSize: '14px', fontWeight: '600', marginBottom: '8px', opacity: 0.9}}>
+                  12-Month Projected Volume
+                </div>
+                <div style={{fontSize: '20px', fontWeight: '700'}}>
+                  {growthRatePct > 0 
+                    ? `${((totals.perMonthBytes / GB_DIV) * Math.pow(1 + growthRatePct/100, 12) / toNum(monthDays)).toFixed(0)} GB/day`
+                    : `${((totals.perMonthBytes / GB_DIV) / toNum(monthDays)).toFixed(0)} GB/day`
+                  }
+                </div>
+                <div style={{fontSize: '12px', opacity: 0.8, marginTop: '4px'}}>
+                  {growthRatePct > 0 ? `+${((Math.pow(1 + growthRatePct/100, 12) - 1) * 100).toFixed(0)}% growth` : 'Static volume'}
+                </div>
+              </div>
+              <div style={{background: 'white', borderRadius: '16px', padding: '20px', textAlign: 'center', border: '1px solid #e2e8f0'}}>
+                <div style={{fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>
+                  {buildPhaseParallel && growthAnalysis ? 'ROI Timeline Impact' : 'Analysis Depth'}
+                </div>
+                {buildPhaseParallel && growthAnalysis ? (
+                  <>
+                    <div style={{fontSize: '20px', fontWeight: '700', color: '#dc2626'}}>
+                      Month {growthAnalysis.paybackMonth >= 36 ? '36+' : growthAnalysis.paybackMonth}
+                    </div>
+                    <div style={{fontSize: '12px', color: '#64748b', marginTop: '4px'}}>
+                      Positive ROI start
+                    </div>
+                    <div style={{fontSize: '11px', color: '#dc2626', marginTop: '8px', fontWeight: '600'}}>
+                      {currencyGBP(avgDailySavings * 7)}/week delay cost
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{fontSize: '20px', fontWeight: '700', color: '#7c3aed'}}>
+                      36 Months
+                    </div>
+                    <div style={{fontSize: '12px', color: '#64748b', marginTop: '4px'}}>
+                      Detailed projections
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            {/* Executive Summary for Implementation Planning */}
+            {buildPhaseParallel && growthAnalysis && (
+              <div style={{
+                marginTop: '20px', 
+                padding: '20px', 
+                background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 95%)', 
+                borderRadius: '16px', 
+                border: '1px solid #0ea5e9'
+              }}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px'}}>
+                  <div style={{fontSize: '20px'}}>💼</div>
+                  <h4 style={{fontSize: '16px', fontWeight: '600', color: '#0c4a6e', margin: 0}}>
+                    Executive Implementation Planning
+                  </h4>
+                </div>
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', fontSize: '14px', color: '#0c4a6e'}}>
+                  <div>
+                    <div style={{fontWeight: '600', marginBottom: '4px'}}>Investment Period:</div>
+                    <div>{growthAnalysis.parallelRunWeeks} weeks dual costs</div>
+                    <div style={{fontSize: '12px', color: '#0369a1'}}>({currencyGBP(growthAnalysis.totalDebt || 0)} investment debt)</div>
+                  </div>
+                  <div>
+                    <div style={{fontWeight: '600', marginBottom: '4px'}}>Delivery Incentive:</div>
+                    <div>{currencyGBP(avgDailySavings)}/day opportunity cost</div>
+                    <div style={{fontSize: '12px', color: '#0369a1'}}>Accelerated deployment = faster ROI</div>
+                  </div>
+                  <div>
+                    <div style={{fontWeight: '600', marginBottom: '4px'}}>Team Accountability:</div>
+                    <div>Focus IT on delivery speed</div>
+                    <div style={{fontSize: '12px', color: '#0369a1'}}>Each delay directly impacts savings</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <ThroughputSummary bytesPerEvent={bytesPerEvent} eps={eps} monthDays={monthDays} useIEC={useIEC} />
+        </div>
+
+        {/* Unit Controls */}
+        <div style={styles.card}>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', alignItems: 'end'}}>
+            <div>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px'}}>Unit Standard</label>
+              <div style={{display: 'flex', gap: '8px'}}>
+                <button 
+                  style={{...styles.button, ...(useIEC ? {} : styles.buttonActive)}} 
+                  onClick={()=>setUseIEC(false)}
+                >
+                  SI
+                </button>
+                <button 
+                  style={{...styles.button, ...(useIEC ? styles.buttonActive : {})}} 
+                  onClick={()=>setUseIEC(true)}
+                >
+                  IEC
+                </button>
+              </div>
+            </div>
+            <div>
+              <label style={{display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px'}}>Month Length</label>
+              <select style={styles.select} value={monthDays} onChange={e=>setMonthDays(toNum(e.target.value))}>
+                <option value={28}>28 days</option>
+                <option value={30}>30 days</option>
+                <option value={31}>31 days</option>
+                <option value={30.44}>Average (30.44)</option>
+              </select>
+            </div>
+            <div>
+              <p style={{fontSize: '12px', color: '#64748b', fontStyle: 'italic'}}>
+                These toggles affect displays & sizing; they do not change the 1,024‑byte event assumption.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Azure Event Hubs */}
+        <div style={styles.card}>
+          <h2 style={styles.sectionTitle}>
+            <div style={{...styles.dot, background: '#8b5cf6'}}></div>
+            Azure Event Hubs
+          </h2>
+          
+          <div style={styles.grid6}>
+            <LabeledNumber label="Batch efficiency %" value={batchEfficiencyPct} onChange={setBatchEfficiencyPct} min={0} max={100} />
+            <LabeledNumber label={`Envelope max (${KB_LABEL})`} value={envelopeMaxSizeKB} onChange={setEnvelopeMaxSizeKB} min={1}/>
+            <LabeledNumber label="£ per million events" value={costPerMillionEvents} step={0.001} onChange={setCostPerMillionEvents} />
+            <LabeledNumber label={`TU ingress (${MB_LABEL}/s per TU)`} value={tuIngressMBpsPerUnit} step={0.1} onChange={setTuIngressMBpsPerUnit} />
+            <LabeledNumber label={`TU ingress (events/s per TU)`} value={tuIngressEventsPerSecPerUnit} onChange={setTuIngressEventsPerSecPerUnit} />
+            <LabeledNumber label="TU price (£/h)" value={tuCostPerHour} step={0.001} onChange={setTuCostPerHour} />
+          </div>
+          
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px'}}>
+            <MetricCard label="Message payload" value={`${fmt(eh.avgMessageBytes,0)} B`} />
+            <MetricCard label="Messages/sec" value={eh.messagesPerSecond.toLocaleString()} />
+            <MetricCard label="Events/month" value={eh.ingressEventsPerMonth.toLocaleString()} />
+            <MetricCard label="Events cost" value={currencyGBP(eh.eventCostMonthly)} />
+            <MetricCard label={`TUs by ${MB_LABEL}/s`} value={eh.tuByMB.toLocaleString()} />
+            <MetricCard label={`TUs by events/s`} value={eh.tuByIngressEvents.toLocaleString()} />
+            <MetricCard label="Bottleneck" value={eh.bottleneck==="mb"?"MB/s":"Events/s"} accent />
+            <MetricCard label="TU cost/month" value={currencyGBP(eh.tuMonthlyCost)} accent />
+          </div>
+        </div>
+
+        {/* Microsoft Sentinel */}
+        <div style={styles.card}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+            <h2 style={{...styles.sectionTitle, margin: 0}}>
+              <div style={{...styles.dot, background: '#10b981'}}></div>
+              Microsoft Sentinel
+            </h2>
+            <div style={{display: 'flex', gap: '16px', fontSize: '14px'}}>
+              <label style={{display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer'}}>
+                <input 
+                  type="checkbox" 
+                  checked={autoSelectCheapest} 
+                  onChange={e=>setAutoSelectCheapest(e.target.checked)}
+                  style={{width: '16px', height: '16px'}}
+                /> 
+                Auto-select cheapest
+              </label>
+              <label style={{display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer'}}>
+                <input 
+                  type="checkbox" 
+                  checked={autoTierByVolume} 
+                  onChange={e=>setAutoTierByVolume(e.target.checked)}
+                  style={{width: '16px', height: '16px'}}
+                /> 
+                Auto-tier by volume
+              </label>
+            </div>
+          </div>
+
+          <div style={styles.grid4}>
+            <MetricCard label="Monthly volume" value={`${fmt(sentinelPayg.monthlyGB,2)} ${GB_LABEL}`} />
+            <MetricCard label="Pricing mode" value={sentinelPricingMode==="payg"?"PAYG":"Commitment"} />
+            <MetricCard label="Selected tier" value={sentinelPricingMode==="payg"?"—":COMMIT[commitTierId].label} />
+            <MetricCard label="Monthly cost" value={currencyGBP(sentinelMonthlyGBP)} accent />
+          </div>
+
+          <button 
+            style={{...styles.button, marginBottom: '16px'}} 
+            onClick={()=>setShowSentinelDetails(s=>!s)}
+          >
+            {showSentinelDetails?"Hide details":"Show details"}
+          </button>
+
+          {showSentinelDetails && (
+            <div style={{background: '#f8fafc', borderRadius: '16px', padding: '20px', overflowX: 'auto'}}>
+              <table style={{width: '95%', fontSize: '14px', borderCollapse: 'collapse'}}>
+                <thead>
+                  <tr style={{borderBottom: '2px solid #e2e8f0'}}>
+                    <th style={{textAlign: 'left', padding: '12px 16px 12px 0', fontWeight: '600', color: '#374151'}}>Tier</th>
+                    <th style={{textAlign: 'left', padding: '12px 16px 12px 0', fontWeight: '600', color: '#374151'}}>Cap (GB/day)</th>
+                    <th style={{textAlign: 'left', padding: '12px 16px 12px 0', fontWeight: '600', color: '#374151'}}>£/day</th>
+                    <th style={{textAlign: 'left', padding: '12px 16px 12px 0', fontWeight: '600', color: '#374151'}}>Monthly total</th>
+                    <th style={{textAlign: 'left', padding: '12px 16px 12px 0', fontWeight: '600', color: '#374151'}}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sentinelCommitRows.rows.map(r=>{
+                    const isSelected = sentinelPricingMode==="commit" && r.id===commitTierId;
+                    const isCheapest = r.id===sentinelCommitRows.cheapestId;
+                    return (
+                      <tr key={r.id} style={{borderBottom: '1px solid #f1f5f9', background: isSelected ? '#eff6ff' : 'transparent'}}>
+                        <td style={{padding: '12px 16px 12px 0', fontWeight: '500'}}>{r.label}</td>
+                        <td style={{padding: '12px 16px 12px 0'}}>{r.capGB.toLocaleString()}</td>
+                        <td style={{padding: '12px 16px 12px 0'}}>{currencyGBP(r.pricePerDayGBP)}</td>
+                        <td style={{padding: '12px 16px 12px 0', fontWeight: '600'}}>{currencyGBP(r.totalGBP)}</td>
+                        <td style={{padding: '12px 16px 12px 0'}}>
+                          <div style={{display: 'flex', gap: '8px'}}>
+                            {isCheapest && (<span style={{padding: '4px 8px', borderRadius: '12px', fontSize: '11px', background: '#dcfce7', color: '#166534', fontWeight: '500'}}>Cheapest</span>)}
+                            {isSelected && (<span style={{padding: '4px 8px', borderRadius: '12px', fontSize: '11px', background: '#dbeafe', color: '#1d4ed8', fontWeight: '500'}}>Selected</span>)}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Azure Data Explorer */}
+        <div style={styles.card}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+              <div style={{...styles.dot, background: '#f59e0b'}}></div>
+              <h2 style={{fontSize: '20px', fontWeight: '600', color: '#1e293b', margin: 0}}>Azure Data Explorer</h2>
+              <span style={{
+                padding: '6px 12px', 
+                borderRadius: '12px', 
+                fontSize: '12px', 
+                fontWeight: '600',
+                background: adx.env==="prod" ? '#fef2f2' : '#f0fdf4',
+                color: adx.env==="prod" ? '#dc2626' : '#16a34a'
+              }}>
+                {adx.env==="prod"?"Production":"Dev/Test"}
+              </span>
+              {enterpriseStaging && (
+                <span style={{
+                  padding: '6px 12px',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  background: '#fdf2f8',
+                  color: '#be185d'
+                }}>
+                  🛡️ Staged Rollout Active
+                </span>
+              )}
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', color: '#64748b'}}>
+              <label style={{display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer'}}>
+                <input 
+                  type="checkbox" 
+                  checked={adxAutoSelectEngines} 
+                  onChange={e=>setAdxAutoSelectEngines(e.target.checked)}
+                  style={{width: '16px', height: '16px'}}
+                /> 
+                Auto-size engines
+              </label>
+              <span style={{background: '#f1f5f9', padding: '4px 8px', borderRadius: '8px', fontSize: '11px'}}>
+                {adx.effectiveEngineNodes} engine / {adx.effectiveDMNodes} DM
+              </span>
+            </div>
+          </div>
+
+          {enterpriseStaging && (
+            <div style={{
+              background: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 95%)',
+              padding: '16px',
+              borderRadius: '12px',
+              border: '1px solid #f9a8d4',
+              marginBottom: '20px'
+            }}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
+                <div style={{fontSize: '18px'}}>🛡️</div>
+                <span style={{fontSize: '14px', fontWeight: '600', color: '#be185d'}}>
+                  Enterprise Staging Impact
+                </span>
+              </div>
+              <div style={{fontSize: '13px', color: '#a21caf'}}>
+                {stagingGraphMode === 'two-phase' ? (
+                  <>
+                    <strong>Two-Phase Strategy:</strong> 3 weeks throttled validation (25% load) → Full parallel run
+                    <br />
+                    <strong>vs Full Parallel:</strong> {currencyGBP(adx.stagingSavings)} saved vs running 95% parallel from day 1
+                  </>
+                ) : (
+                  <>
+                    <strong>Simplified Strategy:</strong> 70% blended parallel run cost throughout migration period
+                    <br />
+                    <strong>vs Full Parallel:</strong> {currencyGBP(adx.stagingSavings)} saved vs running 95% parallel from day 1
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+          
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px'}}>
+            <MetricCard label="Engine/month" value={currencyGBP(adx.engineMonthlyGBP)} />
+            <MetricCard label="DM/month" value={currencyGBP(adx.dmMonthlyGBP)} />
+            <MetricCard 
+              label="Markup/month" 
+              value={adx.env === "devtest" ? (
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center'}}>
+                  <span style={{fontWeight: '700', color: '#16a34a'}}>{currencyGBP(0)}</span>
+                  <span style={{fontSize: '10px', color: '#16a34a', background: '#dcfce7', padding: '2px 6px', borderRadius: '8px'}}>waived</span>
+                </div>
+              ) : currencyGBP(adx.markupMonthlyGBP)} 
+            />
+            <MetricCard label="Storage/month" value={currencyGBP(adx.storageMonthlyGBP)} />
+            <MetricCard 
+              label="ADX Total" 
+              value={
+                <div style={{textAlign: 'center'}}>
+                  <div style={{fontSize: '20px', fontWeight: '700'}}>{currencyGBP(adx.totalGBP)}</div>
+                  {enterpriseStaging && adx.stagingSavings > 0 && (
+                    <div style={{fontSize: '11px', color: '#16a34a', marginTop: '2px'}}>
+                      (-{currencyGBP(adx.stagingSavings)} vs 95% parallel)
+                    </div>
+                  )}
+                </div>
+              }
+              accent 
+            />
+          </div>
+        </div>
+
+        {/* LogiQore VM */}
+        <div style={styles.card}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+              <div style={{...styles.dot, background: '#ef4444'}}></div>
+              <h2 style={{fontSize: '20px', fontWeight: '600', color: '#1e293b', margin: 0}}>LogiQore Black Box VM</h2>
+              <span style={{
+                padding: '6px 12px', 
+                borderRadius: '12px', 
+                fontSize: '12px', 
+                fontWeight: '600',
+                background: vm.confidence.includes('High') ? '#f0fdf4' : '#fef3c7',
+                color: vm.confidence.includes('High') ? '#16a34a' : '#d97706'
+              }}>
+                {vm.confidence}
+              </span>
+            </div>
+            <div style={{fontSize: '12px', color: '#64748b', textAlign: 'right'}}>
+              <div><strong>{vm.skuName}</strong> • {vm.vcpus} vCPUs • {vm.ramGB}GB RAM</div>
+              <div>CPU Load: {vm.cpuUtilization.toFixed(1)}% • Capacity: {vm.maxCapacityEPS.toLocaleString()} EPS</div>
+            </div>
+          </div>
+          
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px'}}>
+            <MetricCard label="VM SKU" value={vm.skuName} />
+            <MetricCard label="Compute/month" value={currencyGBP(vm.computeMonthlyGBP)} />
+            <MetricCard label="Disks/month" value={currencyGBP(vm.disksMonthlyGBP)} />
+            <MetricCard label="Egress/month" value={currencyGBP(vm.egressMonthlyGBP)} />
+            <MetricCard label="VM Total" value={currencyGBP(vm.totalGBP)} accent />
+          </div>
+        </div>
+
+        {/* Interactive Charts - Only show when growth > 0 */}
+        {growthAnalysis && (
+          <div style={styles.card}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px'}}>
+              <div style={{...styles.dot, background: '#6366f1'}}></div>
+              <h2 style={{fontSize: '20px', fontWeight: '600', color: '#1e293b', margin: 0}}>ROI Timeline & Growth Impact</h2>
+              <span style={{
+                padding: '6px 12px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '600',
+                background: '#f0f9ff',
+                color: '#0369a1'
+              }}>
+                36-Month Analysis
+              </span>
+            </div>
+
+            {/* ROI Timeline Chart */}
+            <div style={{marginBottom: '32px'}}>
+              <h3 style={{fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '16px'}}>
+                📈 ROI Timeline: Double-Spend Valley & Recovery
+              </h3>
+              <div style={{height: '300px', width: '95%'}}>
+                <ResponsiveContainer>
+                  <AreaChart data={growthAnalysis.data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="month" 
+                      label={{ value: 'Month', position: 'insideBottom', offset: -10 }}
+                    />
+                    <YAxis 
+                      label={{ value: 'Monthly Savings (£)', angle: -90, position: 'insideLeft' }}
+                      tickFormatter={(value) => `£${(value/1000).toFixed(0)}k`}
+                    />
+                    <Tooltip 
+                      formatter={(value, name) => [currencyGBP(value), name]}
+                      labelFormatter={(month) => `Month ${month}`}
+                    />
+                    <Legend />
+                    <Area 
+                      type="monotone" 
+                      dataKey="adjustedSavings" 
+                      stroke="#10b981" 
+                      fill="#10b981"
+                      fillOpacity={0.3}
+                      name="Adjusted Monthly Savings"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <p style={{fontSize: '12px', color: '#64748b', marginTop: '8px', textAlign: 'center'}}>
+                Shows the "double-spend valley" during parallel run and subsequent recovery to positive ROI
+              </p>
+            </div>
+
+            {/* Cost Comparison Chart */}
+            <div style={{marginBottom: '32px'}}>
+              <h3 style={{fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '16px'}}>
+                💰 Cost Evolution: Sentinel vs LogiQore {enterpriseStaging ? '(with Enterprise Staging)' : ''}
+              </h3>
+              <div style={{height: '300px', width: '95%'}}>
+                <ResponsiveContainer>
+                  <LineChart data={growthAnalysis.data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="month" 
+                      label={{ value: 'Month', position: 'insideBottom', offset: -10 }}
+                    />
+                    <YAxis 
+                      label={{ value: 'Monthly Cost (£)', angle: -90, position: 'insideLeft' }}
+                      tickFormatter={(value) => `£${(value/1000).toFixed(0)}k`}
+                    />
+                    <Tooltip 
+                      formatter={(value, name) => [currencyGBP(value), name]}
+                      labelFormatter={(month) => `Month ${month}`}
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="sentinelCost" 
+                      stroke="#dc2626" 
+                      strokeWidth={3}
+                      dot={{ fill: '#dc2626', strokeWidth: 2, r: 4 }}
+                      name="Sentinel Cost"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="logiQoreCost" 
+                      stroke="#2563eb" 
+                      strokeWidth={3}
+                      dot={{ fill: '#2563eb', strokeWidth: 2, r: 4 }}
+                      name={enterpriseStaging ? "LogiQore Cost (Staged)" : "LogiQore Cost"}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <p style={{fontSize: '12px', color: '#64748b', marginTop: '8px', textAlign: 'center'}}>
+                Sentinel's stair-step pricing vs LogiQore's smooth scaling with {growthRatePct}% monthly growth
+                {enterpriseStaging && ` • ${stagingGraphMode === 'two-phase' ? 'Two-phase' : 'Simplified'} staging optimization applied`}
+              </p>
+            </div>
+
+            {/* Cumulative Savings Chart */}
+            <div>
+              <h3 style={{fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '16px'}}>
+                🚀 Cumulative ROI: The Hockey Stick Effect
+              </h3>
+              <div style={{height: '300px', width: '95%'}}>
+                <ResponsiveContainer>
+                  <AreaChart data={growthAnalysis.data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="month" 
+                      label={{ value: 'Month', position: 'insideBottom', offset: -10 }}
+                    />
+                    <YAxis 
+                      label={{ value: 'Cumulative Savings (£)', angle: -90, position: 'insideLeft' }}
+                      tickFormatter={(value) => `£${(value/1000).toFixed(0)}k`}
+                    />
+                    <Tooltip 
+                      formatter={(value, name) => [currencyGBP(value), name]}
+                      labelFormatter={(month) => `Month ${month}`}
+                    />
+                    <Legend />
+                    <Area 
+                      type="monotone" 
+                      dataKey="cumulativeSavings" 
+                      stroke="#7c3aed" 
+                      fill="#7c3aed"
+                      fillOpacity={0.4}
+                      name="Cumulative Savings"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <p style={{fontSize: '12px', color: '#64748b', marginTop: '8px', textAlign: 'center'}}>
+                Compound effect of growth + savings acceleration over 36 months
+                {enterpriseStaging && ' • Enhanced by enterprise staging strategy'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Growth Impact Analysis - Enhanced with 36-month view */}
+        {growthAnalysis && (
+          <div style={styles.card}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px'}}>
+              <div style={{...styles.dot, background: '#f59e0b'}}></div>
+              <h2 style={{fontSize: '20px', fontWeight: '600', color: '#1e293b', margin: 0}}>Detailed Analysis</h2>
+              <span style={{
+                padding: '6px 12px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '600',
+                background: '#fef3c7',
+                color: '#d97706'
+              }}>
+                {growthRatePct}% CAGR
+              </span>
+              {enterpriseStaging && (
+                <span style={{
+                  padding: '6px 12px',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  background: '#fdf2f8',
+                  color: '#be185d'
+                }}>
+                  {stagingGraphMode === 'two-phase' ? 'Two-Phase' : 'Simplified'} Staging
+                </span>
+              )}
+            </div>
+            
+            <p style={{fontSize: '14px', color: '#64748b', marginBottom: '20px'}}>
+              <strong>CFO Brief:</strong> This analysis models compound annual growth rate (CAGR) impact on observability costs. 
+              As your business scales (customers ↑, transactions ↑, platform usage ↑), log volumes compound. 
+              Sentinel's tier-based pricing creates cost cliffs, while LogiQore scales linearly - generating exponential savings advantages over time.
+              <br />
+              <span style={{color: '#16a34a', fontWeight: '600'}}>💡 Finance Insight: Higher growth rates = Higher LogiQore ROI!</span> Each additional GB of logs widens your competitive moat.
+              <br />
+              <span style={{color: '#dc2626', fontWeight: '600'}}>⚠️ The 80GB Production Cliff:</span> Watch ADX transition from Dev/Test to Production pricing - this creates temporary savings reduction.
+              {enterpriseStaging && (
+                <>
+                  <br />
+                  <span style={{color: '#ec4899', fontWeight: '600'}}>🎯 Enterprise Staging Advantage:</span> 
+                  {stagingGraphMode === 'two-phase' 
+                    ? ' Two-phase rollout minimizes parallel run costs while maintaining validation safety.'
+                    : ' Simplified 70% cost model provides clean executive presentation of staging benefits.'
+                  }
+                </>
+              )}
+            </p>
+
+            {/* Rest of the growth analysis content remains the same */}
+            <div style={{background: '#f8fafc', borderRadius: '16px', padding: '20px', overflowX: 'auto', marginBottom: '20px'}}>
+              <h4 style={{fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px'}}>Monthly Detail (Months 1-12)</h4>
+              <table style={{width: '95%', fontSize: '12px', borderCollapse: 'collapse'}}>
+                <thead>
+                  <tr style={{borderBottom: '2px solid #e2e8f0'}}>
+                    <th style={{textAlign: 'left', padding: '8px 12px 8px 0', fontWeight: '600', color: '#374151'}}>Month</th>
+                    <th style={{textAlign: 'right', padding: '8px 12px 8px 0', fontWeight: '600', color: '#374151'}}>Volume</th>
+                    <th style={{textAlign: 'right', padding: '8px 12px 8px 0', fontWeight: '600', color: '#374151'}}>Sentinel</th>
+                    <th style={{textAlign: 'center', padding: '8px 12px 8px 0', fontWeight: '600', color: '#374151'}}>Tier</th>
+                    <th style={{textAlign: 'right', padding: '8px 12px 8px 0', fontWeight: '600', color: '#374151'}}>LogiQore</th>
+                    <th style={{textAlign: 'right', padding: '8px 12px 8px 0', fontWeight: '600', color: '#374151'}}>Savings</th>
+                    <th style={{textAlign: 'right', padding: '8px 12px 8px 0', fontWeight: '600', color: '#374151'}}>Savings %</th>
+                    <th style={{textAlign: 'center', padding: '8px 12px 8px 0', fontWeight: '600', color: '#374151'}}>Environment</th>
+                    <th style={{textAlign: 'center', padding: '8px 12px 8px 0', fontWeight: '600', color: '#374151'}}>Alerts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {growthAnalysis.detailedData.map((row, index) => (
+                    <tr key={index} style={{borderBottom: '1px solid #f1f5f9', background: row.isParallelRunMonth ? '#fef2f2' : 'transparent'}}>
+                      <td style={{padding: '12px 12px 12px 0', fontWeight: '500'}}>
+                        {row.month}
+                        {row.isParallelRunMonth && (
+                          <div style={{fontSize: '10px', color: '#dc2626', fontWeight: '600'}}>
+                            {(() => {
+                              const totalParallelDays = growthAnalysis.parallelRunWeeks * 7;
+                              const fullMonthsBefore = row.month - 1;
+                              const daysInPreviousMonths = fullMonthsBefore * toNum(monthDays);
+                              const remainingDays = totalParallelDays - daysInPreviousMonths;
+                              const isFullParallelMonth = remainingDays >= toNum(monthDays);
+                              return isFullParallelMonth ? 'PARALLEL' : 'PARTIAL PARALLEL';
+                            })()}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{padding: '12px 12px 12px 0', textAlign: 'right', fontWeight: '500'}}>{row.gbPerDay.toFixed(0)} GB/day</td>
+                      <td style={{padding: '12px 12px 12px 0', textAlign: 'right', fontWeight: row.tierJump ? '700' : '400'}}>
+                        {currencyGBP(row.sentinelCost)}
+                      </td>
+                      <td style={{padding: '12px 12px 12px 0', textAlign: 'center'}}>
+                        <span style={{
+                          padding: '2px 6px',
+                          borderRadius: '8px',
+                          fontSize: '10px',
+                          fontWeight: '600',
+                          background: row.tierJump ? '#fef2f2' : '#f1f5f9',
+                          color: row.tierJump ? '#dc2626' : '#64748b'
+                        }}>
+                          {row.sentinelTier}
+                        </span>
+                      </td>
+                      <td style={{padding: '12px 12px 12px 0', textAlign: 'right', fontWeight: row.environmentChange ? '700' : '400'}}>
+                        {currencyGBP(row.logiQoreCost)}
+                      </td>
+                      <td style={{padding: '12px 12px 12px 0', textAlign: 'right', fontWeight: '600', color: row.adjustedSavings >= 0 ? '#16a34a' : '#dc2626'}}>
+                        {currencyGBP(row.adjustedSavings)}
+                        {row.isParallelRunMonth && row.adjustedSavings !== row.monthlySavings && (
+                          <div style={{fontSize: '10px', color: '#dc2626'}}>
+                            (-{currencyGBP(row.monthlySavings - row.adjustedSavings)} parallel cost)
+                          </div>
+                        )}
+                      </td>
+                      <td style={{padding: '12px 12px 12px 0', textAlign: 'right', fontWeight: '600', color: row.adjustedSavings >= 0 ? '#16a34a' : '#dc2626'}}>
+                        {((row.adjustedSavings / row.sentinelCost) * 100).toFixed(1)}%
+                      </td>
+                      <td style={{padding: '12px 12px 12px 0', textAlign: 'center'}}>
+                        <span style={{
+                          padding: '2px 6px',
+                          borderRadius: '8px',
+                          fontSize: '10px',
+                          fontWeight: '600',
+                          background: row.environment === 'prod' ? '#fef2f2' : '#f0fdf4',
+                          color: row.environment === 'prod' ? '#dc2626' : '#16a34a'
+                        }}>
+                          {row.environment === 'prod' ? 'Prod' : 'Dev'}
+                        </span>
+                      </td>
+                      <td style={{padding: '12px 12px 12px 0', textAlign: 'center'}}>
+                        <div style={{display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap'}}>
+                          {row.tierJump && (
+                            <span style={{
+                              padding: '2px 4px',
+                              borderRadius: '4px',
+                              fontSize: '9px',
+                              fontWeight: '600',
+                              background: '#fef2f2',
+                              color: '#dc2626'
+                            }}>
+                              TIER↑
+                            </span>
+                          )}
+                          {row.environmentChange && (
+                            <span style={{
+                              padding: '2px 4px',
+                              borderRadius: '4px',
+                              fontSize: '9px',
+                              fontWeight: '600',
+                              background: '#fef3c7',
+                              color: '#d97706'
+                            }}>
+                              ENV↑
+                            </span>
+                          )}
+                          {row.isParallelRunMonth && (
+                            <span style={{
+                              padding: '2px 4px',
+                              borderRadius: '4px',
+                              fontSize: '9px',
+                              fontWeight: '600',
+                              background: '#fef2f2',
+                              color: '#dc2626'
+                            }}>
+                              2X COST
+                            </span>
+                          )}
+                          {enterpriseStaging && (
+                            <span style={{
+                              padding: '2px 4px',
+                              borderRadius: '4px',
+                              fontSize: '9px',
+                              fontWeight: '600',
+                              background: '#fdf2f8',
+                              color: '#be185d'
+                            }}>
+                              STAGED
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 36-Month Snapshots */}
+            {growthAnalysis.snapshotData.length > 0 && (
+              <div style={{background: '#f0f9ff', borderRadius: '16px', padding: '20px', marginBottom: '20px'}}>
+                <h4 style={{fontSize: '14px', fontWeight: '600', color: '#1e40af', marginBottom: '12px'}}>📊 Long-Term Projections (18, 24, 30, 36 Months)</h4>
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px'}}>
+                  {growthAnalysis.snapshotData.map((row, index) => (
+                    <div key={index} style={{background: 'white', borderRadius: '12px', padding: '16px', border: '1px solid #e0e7ff'}}>
+                      <div style={{fontSize: '18px', fontWeight: '700', color: '#1e40af', marginBottom: '8px'}}>
+                        Month {row.month}
+                      </div>
+                      <div style={{fontSize: '12px', color: '#64748b', marginBottom: '4px'}}>
+                        {row.gbPerDay.toFixed(0)} GB/day (+{(((row.gbPerDay / (totals.perMonthBytes / GB_DIV / toNum(monthDays))) - 1) * 100).toFixed(0)}%)
+                      </div>
+                      <div style={{fontSize: '14px', fontWeight: '600', color: '#16a34a'}}>
+                        {currencyGBP(row.adjustedSavings)}/month
+                      </div>
+                      <div style={{fontSize: '12px', color: '#7c3aed'}}>
+                        Cumulative: {currencyGBP(row.cumulativeSavings)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px'}}>
+              <MetricCard 
+                label="36-Month Cumulative" 
+                value={currencyGBP(growthAnalysis.data[growthAnalysis.data.length - 1]?.cumulativeSavings || 0)} 
+                accent 
+              />
+              <MetricCard 
+                label="Average Monthly Savings" 
+                value={currencyGBP((growthAnalysis.data[growthAnalysis.data.length - 1]?.cumulativeSavings || 0) / 36)} 
+              />
+              <MetricCard 
+                label="Cost Per Day of Delay" 
+                value={currencyGBP(avgDailySavings)} 
+              />
+              <MetricCard 
+                label="Payback Period" 
+                value={growthAnalysis.paybackMonth >= 36 ? "36+ months" : `Month ${growthAnalysis.paybackMonth}`}
+              />
+            </div>
+            
+            <div style={{background: '#f0fdf4', border: '1px solid #16a34a', borderRadius: '12px', padding: '16px', fontSize: '14px'}}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
+                <span style={{fontSize: '16px'}}>🚀</span>
+                <strong style={{color: '#16a34a'}}>LogiQore Scales With Your Success</strong>
+              </div>
+              <p style={{margin: 0, color: '#166534'}}>
+                The more data you send through LogiQore, the greater your savings become! 
+                Unlike Sentinel's tier jumps, LogiQore rewards growth with exponentially better economics. 
+                <strong>Trust the stack - feed it more logs!</strong>
+                {enterpriseStaging && (
+                  <span style={{display: 'block', marginTop: '8px', fontWeight: '600', color: '#be185d'}}>
+                    💼 Enterprise Staging: {stagingGraphMode === 'two-phase' ? 'Two-phase' : 'Simplified'} approach optimizes parallel run costs for executive oversight.
+                  </span>
+                )}
+                {buildPhaseParallel && (
+                  <span style={{display: 'block', marginTop: '8px', fontWeight: '600'}}>
+                    Remember: {growthAnalysis.parallelRunWeeks}-week parallel run creates {currencyGBP(growthAnalysis.totalDebt || 0)} debt to recover.
+                    {growthAnalysis.paybackMonth >= 36 && " Extended parallel run pushes payback beyond 36 months."}
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Build/BAU Controls & Savings */}
+        <div style={styles.card}>
+          <div style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '20px', marginBottom: '24px'}}>
+            <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}}>
+              <input 
+                type="checkbox" 
+                checked={buildPhaseParallel} 
+                onChange={e=>setBuildPhaseParallel(e.target.checked)}
+                style={{width: '18px', height: '18px'}}
+              /> 
+              <span style={{fontWeight: '500'}}>Build phase: run LogiQore in <strong>parallel</strong> with Sentinel</span>
+            </label>
+          </div>
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px'}}>
+            <MetricCard label="LogiQore Stack — monthly" value={currencyGBP(logiQoreStackMonthlyGBP)} />
+            <MetricCard 
+              label="Sentinel — monthly" 
+              value={<span style={buildPhaseParallel?{}:{textDecoration: 'line-through', opacity: 0.5}}>{currencyGBP(sentinelMonthlyGBP)}</span>} 
+            />
+            <MetricCard 
+              label="Current mode total" 
+              value={
+                <div>
+                  <div style={{fontSize: '24px', fontWeight: '700', marginBottom: '4px'}}>{currencyGBP(currentModeMonthlyTotal)}</div>
+                  <div style={{fontSize: '12px', color: '#64748b'}}>Mode: {buildPhaseParallel?"Build (parallel)":"BAU (LogiQore only)"}</div>
+                  {enterpriseStaging && (
+                    <div style={{fontSize: '11px', color: '#be185d', marginTop: '2px'}}>
+                      Enterprise staged rollout
+                    </div>
+                  )}
+                </div>
+              } 
+              accent 
+            />
+          </div>
+
+          {/* Savings Hero */}
+          <div style={styles.savingsHero}>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr auto', gap: '32px', alignItems: 'center'}}>
+              <div style={{textAlign: 'left'}}>
+                <p style={{fontSize: '14px', opacity: 0.9, marginBottom: '8px'}}>
+                  {growthAnalysis ? 
+                    `BAU Savings vs Sentinel (With ${growthRatePct}% Monthly Growth)` : 
+                    'BAU Savings vs Sentinel (Analytics Layer)'
+                  }
+                  {enterpriseStaging && (
+                    <span style={{display: 'block', fontSize: '12px', opacity: 0.8}}>
+                      • Enhanced with {stagingGraphMode === 'two-phase' ? 'two-phase' : 'simplified'} enterprise staging
+                    </span>
+                  )}
+                </p>
+                <div style={{fontSize: '48px', fontWeight: '700', marginBottom: '8px'}}>
+                  {currencyGBP(savingMonthly)}
+                  <span style={{fontSize: '18px', fontWeight: '400', marginLeft: '8px'}}>/ month</span>
+                </div>
+                <p style={{fontSize: '20px', fontWeight: '600', opacity: 0.9}}>{fmt(savingPct,1)}% less expensive</p>
+                {growthAnalysis && (
+                  <p style={{fontSize: '14px', opacity: 0.8, marginTop: '8px'}}>
+                    Growing to {currencyGBP(growthAnalysis.data[growthAnalysis.data.length-1]?.monthlySavings || 0)}/month by year-end
+                  </p>
+                )}
+              </div>
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px'}}>
+                <div style={{background: 'rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', textAlign: 'center', backdropFilter: 'blur(10px)'}}>
+                  <div style={{fontSize: '12px', opacity: 0.8, marginBottom: '4px'}}>Quarterly</div>
+                  <div style={{fontSize: '18px', fontWeight: '700'}}>{currencyGBP(saveQtr)}</div>
+                </div>
+                <div style={{background: 'rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', textAlign: 'center', backdropFilter: 'blur(10px)'}}>
+                  <div style={{fontSize: '12px', opacity: 0.8, marginBottom: '4px'}}>Annual</div>
+                  <div style={{fontSize: '18px', fontWeight: '700'}}>{currencyGBP(saveYr)}</div>
+                </div>
+                <div style={{background: 'rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', textAlign: 'center', backdropFilter: 'blur(10px)'}}>
+                  <div style={{fontSize: '12px', opacity: 0.8, marginBottom: '4px'}}>3 Years</div>
+                  <div style={{fontSize: '18px', fontWeight: '700'}}>{currencyGBP(save3Yr)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{marginTop: '16px', fontSize: '12px', color: '#64748b', background: '#f8fafc', borderRadius: '12px', padding: '16px'}}>
+            <strong>Notes:</strong> Savings compare analytics layer only (Sentinel vs ADX+LogiQore VM). Event Hubs excluded. 
+            Assumes <strong>730 h/month</strong>. VM sizing based on real-world testing: 1,000 EPS at 5% CPU on B2s. 
+            {growthAnalysis ? 
+              `Growth projections recalculate all costs month-by-month at ${growthRatePct}% monthly growth rate.` : 
+              'Build proration respects selected month length.'
+            }
+            {buildPhaseParallel && (
+              <span style={{display: 'block', marginTop: '8px', fontWeight: '600', color: '#dc2626'}}>
+                Parallel run analysis assumes {parallelRunMinWeeks}-week minimum overlap, impacting Month 1 ROI calculations.
+              </span>
+            )}
+            {enterpriseStaging && (
+              <span style={{display: 'block', marginTop: '8px', fontWeight: '600', color: '#be185d'}}>
+                Enterprise staging: {stagingGraphMode === 'two-phase' ? 'Two-phase rollout (3 weeks @ 25%, then full load)' : 'Simplified 70% blended cost model'} applied to ADX costs.
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MetricCard({label, value, accent = false}) {
+  const baseStyle = {
+    background: accent ? 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 95%)' : '#f8fafc',
+    border: accent ? '2px solid #3b82f6' : '1px solid #e2e8f0',
+    borderRadius: '16px',
+    padding: '20px',
+    textAlign: 'center',
+    transition: 'transform 0.2s ease'
+  };
+
+  return (
+    <div style={baseStyle}>
+      <div style={{
+        fontSize: '12px', 
+        fontWeight: '600', 
+        color: accent ? '#1e40af' : '#64748b', 
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        marginBottom: '8px'
+      }}>
+        {label}
+      </div>
+      <div style={{
+        fontSize: '20px', 
+        fontWeight: '700', 
+        color: accent ? '#1e40af' : '#1e293b'
+      }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function LabeledNumber({label, value, onChange, min, max, step=1}) {
+  return (
+    <div style={{background: '#f8fafc', borderRadius: '16px', padding: '16px'}}>
+      <label style={{display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '8px'}}>{label}</label>
+      <input 
+        type="number" 
+        style={{
+          width: '95%',
+          border: '2px solid #e2e8f0',
+          borderRadius: '8px',
+          padding: '10px 12px',
+          textAlign: 'center',
+          fontWeight: '600',
+          fontSize: '14px',
+          outline: 'none'
+        }}
+        value={value} 
+        min={min} 
+        max={max} 
+        step={step} 
+        onChange={e=>onChange(toNum(e.target.value))} 
+      />
+    </div>
+  );
+}
+
+function ThroughputSummary({bytesPerEvent, eps, monthDays, useIEC}) {
+  const bps = toNum(bytesPerEvent)*toNum(eps);
+  const by = { sec: bps, min: bps*60, hour: bps*3600, day: bps*86400, week: bps*604800, month: bps*86400*toNum(monthDays) };
+  
+  const human = (bytes) => {
+    const step = useIEC?1024:1000;
+    const units = useIEC?["B","KiB","MiB","GiB","TiB","PiB"]:["B","kB","MB","GB","TB","PB"];
+    if(!Number.isFinite(bytes) || bytes<=0) return `0 ${units[0]}`;
+    let v=bytes, i=0; 
+    while(v>=step && i<units.length-1){ v/=step; i++; }
+    return `${v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ${units[i]}`;
+  };
+
+  return (
+    <div style={{background: '#f1f5f9', borderRadius: '20px', padding: '24px', marginTop: '24px'}}>
+      <h3 style={{fontSize: '18px', fontWeight: '600', color: '#1e293b', marginBottom: '16px'}}>Throughput (auto-scaled)</h3>
+      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px'}}>
+        {[
+          {label: 'Per second', value: `${human(by.sec)}/s`},
+          {label: 'Per minute', value: `${human(by.min)}/min`},
+          {label: 'Per hour', value: `${human(by.hour)}/h`},
+          {label: 'Per day', value: `${human(by.day)}/day`},
+          {label: 'Per week', value: `${human(by.week)}/week`},
+          {label: `Per month (${monthDays}d)`, value: `${human(by.month)}/month`}
+        ].map((item, i) => (
+          <div key={i} style={{
+            background: 'white', 
+            borderRadius: '12px', 
+            padding: '16px', 
+            border: '1px solid #e2e8f0', 
+            textAlign: 'center',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}>
+            <div style={{fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '6px'}}>{item.label}</div>
+            <div style={{fontSize: '18px', fontWeight: '700', color: '#1e293b'}}>{item.value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}%                                                                                                                                                   ben@Mac src % 

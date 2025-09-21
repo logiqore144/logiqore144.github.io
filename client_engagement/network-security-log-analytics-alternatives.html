@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Security Log Analytics Alternatives - LogiQore vs Cribl/Sumo Logic/CrowdStrike</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Application Insights -->
+    <script>
+    !function(T,l,y){var S=T.location,k="script",D="instrumentationKey",C="ingestionendpoint",I="disableExceptionTracking",E="ai.device.",b="toLowerCase",w="crossOrigin",N="POST",e="appInsightsSDK",t=y.name||"appInsights";(y.name||T[e])&&(T[e]=t);var n=T[t]||function(d){var g=!1,f=!1,m={initialize:!0,queue:[],sv:"5",version:2,config:d};function v(e,t){var n={},a="Browser";return n[E+"id"]=a[b](),n[E+"type"]=a,n["ai.operation.name"]=S&&S.pathname||"_unknown_",n["ai.internal.sdkVersion"]="javascript:snippet_"+(m.sv||m.version),{time:function(){var a=new Date;function b(e){var t=""+e;return 1===t.length&&(t="0"+t),t}return a.getUTCFullYear()+"-"+b(1+a.getUTCMonth())+"-"+b(a.getUTCDate())+"T"+b(a.getUTCHours())+":"+b(a.getUTCMinutes())+":"+b(a.getUTCSeconds())+"."+(a.getUTCMilliseconds()/1e3).toFixed(3).slice(2,5)+"Z"}(),iKey:e,name:"Microsoft.ApplicationInsights."+t.replace(/-/g,"")+"."+n,sampleRate:100,tags:n,data:{baseData:{ver:2}}}}var h=d.url||y.src;if(h){function a(e){var t,n,a,i,r,o,s,c,u,p,l;g=!0,m.queue=[],f||(f=!0,t=h,s=function(){var e={},t=d.connectionString;if(t)for(var n=t.split(";"),a=0;a<n.length;a++){var i=n[a].split("=");2===i.length&&(e[i[0][b]()]=i[1])}if(!e[C]){var r=e.endpointsuffix,o=r?e.location:null;e[C]="https://"+(o?o+".":"")+"dc."+(r||"services.visualstudio.com")}return e}(),c=s[D]||d[D]||"",u=s[C],p=u?u+"/v2/track":d.endpointUrl,(l=[]).push((n="SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details)",a=t,i=p,(o=(r=v(c,"Exception")).data).baseType="ExceptionData",o.baseData.exceptions=[{typeName:"SDKLoadFailed",message:n.replace(/\./g,"-"),hasFullStack:!1,stack:n+"\nSnippet failed to load ["+a+"] -- Telemetry is disabled\nHelp Link: https://go.microsoft.com/fwlink/?linkid=2128109\nHost: "+(S&&S.pathname||"_unknown_")+"\nEndpoint: "+i,parsedStack:[]}],r)),l.push(function(e,t,n,a){var i=v(c,"Message"),r=i.data;r.baseType="MessageData";var o=r.baseData;return o.message='AI (Internal): 99 message:"'+("SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details) ("+n+")").replace(/\"/g,"")+'"',o.properties={endpoint:a},i}(0,0,t,p)),function(e,t){if(JSON){var n=T.fetch;if(n&&!y.useXhr)n(t,{method:N,body:JSON.stringify(e),mode:"cors"});else if(XMLHttpRequest){var a=new XMLHttpRequest;a.open(N,t),a.setRequestHeader("Content-type","application/json"),a.send(JSON.stringify(e))}}}(l,p))}function i(e,t){f||setTimeout(function(){!t&&m.core||a()},500)}var e=function(){var n=l.createElement(k);n.src=h;var e=y[w];return!e&&""!==e||"undefined"==n[w]||(n[w]=e),n.onload=i,n.onerror=a,n.onreadystatechange=function(e,t){"loaded"!==n.readyState&&"complete"!==n.readyState||i(0,t)},n}();y.ld<0?l.getElementsByTagName("head")[0].appendChild(e):setTimeout(function(){l.getElementsByTagName(k)[0].parentNode.insertBefore(e,l.getElementsByTagName(k)[0])},y.ld||0)}try{m.cookie=l.cookie}catch(p){}function t(e){for(;e.length;)!function(t){m[t]=function(){var e=arguments;g||m.queue.push(function(){m[t].apply(m,e)})}}(e.pop())}var n="track",r="TrackPage",o="TrackEvent";t([n+"Event",n+"PageView",n+"Exception",n+"Trace",n+"DependencyData",n+"Metric",n+"PageViewPerformance","start"+r,"stop"+r,"start"+o,"stop"+o,"addTelemetryInitializer","setAuthenticatedUserContext","clearAuthenticatedUserContext","flush"]),m.SeverityLevel={Verbose:0,Information:1,Warning:2,Error:3,Critical:4};var s=(d.extensionConfig||{}).ApplicationInsightsAnalytics||{};if(!0!==d[I]&&!0!==s[I]){var c="onerror";t(["_"+c]);var u=T[c];T[c]=function(e,t,n,a,i){var r=u&&u(e,t,n,a,i);return!0!==r&&m["_"+c]({message:e,url:t,lineNumber:n,columnNumber:a,error:i}),r},d.autoExceptionInstrumented=!0}return m}(y.cfg);function a(){y.onInit&&y.onInit(n)}(T[t]=n).queue&&0===n.queue.length?(n.queue.push(a),n.trackPageView({})):a()}(window,document,{
+        src: "https://js.monitor.azure.com/scripts/b/ai.2.min.js",
+        cfg: {
+            connectionString: "InstrumentationKey=7e6b5832-fa2b-4436-9f0f-8744afd1eae9;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=afe779d3-7128-4628-95f6-2c239c1f82f8"
+        }
+    });
+    
+    // Page tracking
+    appInsights.trackPageView({ name: 'CompetitiveComparisonPage' });
+    
+    // Enhanced tracking functions
+    function trackCompetitiveInteraction(interactionType, competitor, section) {
+        appInsights.trackEvent({
+            name: 'CompetitiveAnalysisEngagement',
+            properties: {
+                interactionType: interactionType,
+                competitor: competitor,
+                section: section,
+                timestamp: new Date().toISOString(),
+                pageLocation: 'competitive-comparison'
+            }
+        });
+    }
+    
+    function trackSectionView(sectionName, timeSpent) {
+        appInsights.trackEvent({
+            name: 'SectionViewed',
+            properties: {
+                sectionName: sectionName,
+                timeSpent: timeSpent.toString(),
+                engagementLevel: timeSpent > 30 ? 'High' : timeSpent > 10 ? 'Medium' : 'Low',
+                timestamp: new Date().toISOString()
+            }
+        });
+    }
+    
+    function trackCompetitiveAdvantage(advantage, competitor) {
+        appInsights.trackEvent({
+            name: 'CompetitiveAdvantageHighlight',
+            properties: {
+                advantage: advantage,
+                competitor: competitor,
+                timestamp: new Date().toISOString(),
+                potentialLead: 'true'
+            }
+        });
+    }
+    
+    // Section timing tracking
+    let sectionStartTime = Date.now();
+    function startSectionTimer() {
+        sectionStartTime = Date.now();
+    }
+    
+    function endSectionTimer(sectionName) {
+        const timeSpent = Math.floor((Date.now() - sectionStartTime) / 1000);
+        trackSectionView(sectionName, timeSpent);
+    }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- LogiQore Header Banner -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-6xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">LQ</span>
+                    </div>
+                    <span class="text-xl font-semibold text-gray-900">LogiQore</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors" 
+                       onclick="trackCompetitiveInteraction('Navigation', 'N/A', 'BackToPlatform')">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        <span class="text-sm font-medium">Back to Platform Overview</span>
+                    </a>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-sm text-gray-600">Platform Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-8 mb-8 text-white" 
+             onmouseover="startSectionTimer()" 
+             onmouseout="endSectionTimer('HeroSection')">
+            <h1 class="text-3xl font-bold mb-4">Transform Your SIEM Economics Without Compromising Security</h1>
+            <p class="text-xl mb-2">McKinsey research shows enterprises process 80-98% routine operational noise through premium SIEM tiers, while Deloitte reports 57% are increasing cybersecurity budgets.</p>
+            <p class="text-lg font-medium">LogiQore intelligently optimizes this spend while enhancing security outcomes.</p>
+        </div>
+
+        <!-- Main Comparison Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h2 class="text-2xl font-bold text-gray-900">Competitive Comparison Overview</h2>
+                <p class="text-gray-600 mt-2">How LogiQore compares to established market solutions</p>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 border-b">Comparison Factor</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 border-b">LogiQore</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600 border-b">Cribl</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600 border-b">Sumo Logic</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-red-600 border-b">CrowdStrike + Onum</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr onclick="trackCompetitiveInteraction('RowClick', 'All', 'CoreSolutionFocus')" class="hover:bg-gray-50 cursor-pointer">
+                            <td class="px-6 py-4 font-medium text-gray-900">Core Solution Focus</td>
+                            <td class="px-6 py-4 text-blue-600">True firehose network security analytics that <strong>enhances detection capabilities</strong> by enabling complete data ingestion at SIEM-optimized costs</td>
+                            <td class="px-6 py-4 text-gray-700">Data pipeline and routing platform designed to reduce data volumes to manage downstream costs</td>
+                            <td class="px-6 py-4 text-gray-700">Cloud-native log analytics and SIEM platform with broad security and operational use cases</td>
+                            <td class="px-6 py-4 text-red-600">Integrated SIEM + "smart filtering" data pipeline promising "autonomous cybersecurity at scale" <em class="text-sm">(Aug 2025 acquisition announcement)</em></td>
+                        </tr>
+                        <tr onclick="trackCompetitiveInteraction('RowClick', 'All', 'DataPhilosophy')" class="hover:bg-gray-50 cursor-pointer">
+                            <td class="px-6 py-4 font-medium text-gray-900">Data Philosophy</td>
+                            <td class="px-6 py-4 text-blue-600"><strong>"Ingest everything, analyze everything"</strong> - ADX economics enable full-fidelity data retention</td>
+                            <td class="px-6 py-4 text-gray-700">"Route data to multiple downstream analytics and storage services" - enables efficient data pipeline optimization</td>
+                            <td class="px-6 py-4 text-gray-700">"Free, unlimited log data ingest" - Flex Licensing removes cost barriers for data ingestion</td>
+                            <td class="px-6 py-4 text-red-600">"Smart filtering transforms data in motion into real-time intelligence" - <strong>TBC</strong> what % of data gets filtered out</td>
+                        </tr>
+                        <tr onclick="trackCompetitiveInteraction('RowClick', 'All', 'NetworkSecurityApproach')" class="hover:bg-gray-50 cursor-pointer">
+                            <td class="px-6 py-4 font-medium text-gray-900">Network Security Data Approach</td>
+                            <td class="px-6 py-4 text-blue-600">
+                                <strong>Full-fidelity ingestion</strong> - every firewall log, DNS query, WAF event<br>
+                                <strong>Complete network visibility</strong> - comprehensive attack surface monitoring<br>
+                                <strong>Extended retention</strong> - long-term forensic capabilities
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">Routes network security data to multiple analytics and storage services, with analytics capabilities depending on destination tools selected</td>
+                            <td class="px-6 py-4 text-gray-700">Cloud-native platform with built-in security analytics capabilities, including Cloud SIEM for network security monitoring and analysis</td>
+                            <td class="px-6 py-4 text-red-600">
+                                "In-pipeline analysis" starts detection before data enters platform<br>
+                                <strong>TBC</strong> - network data coverage after smart filtering<br>
+                                <strong>TBC</strong> - blind spot mitigation strategies
+                            </td>
+                        </tr>
+                        <tr onclick="trackCompetitiveInteraction('RowClick', 'All', 'ScalabilityEconomics')" class="hover:bg-gray-50 cursor-pointer">
+                            <td class="px-6 py-4 font-medium text-gray-900">Scalability Economics</td>
+                            <td class="px-6 py-4 text-blue-600">
+                                <strong>Linear scaling economics</strong> - predictable cost growth<br>
+                                True firehose capability without economic penalties<br>
+                                <em>"Turn on another fire hydrant, costs slightly increase"</em>
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">Routes data to multiple destinations efficiently, helping organizations manage downstream tool costs and complexity</td>
+                            <td class="px-6 py-4 text-gray-700">Flex Licensing with free unlimited ingest, charges only for analytics and insights generated from the data</td>
+                            <td class="px-6 py-4 text-red-600">
+                                Claims "up to 50% cost reduction through smart filtering"<br>
+                                <strong>TBC</strong> - total cost of ownership vs. feature completeness<br>
+                                <strong>TBC</strong> - scaling economics as data volumes grow
+                            </td>
+                        </tr>
+                        <tr onclick="trackCompetitiveAdvantage('Enhanced Detection', 'All Competitors')" class="hover:bg-blue-50 cursor-pointer">
+                            <td class="px-6 py-4 font-medium text-gray-900">Security Enhancement Advantage</td>
+                            <td class="px-6 py-4 text-blue-600">
+                                <strong>Enhanced threat detection through economic advantage</strong><br>
+                                Process network logs previously filtered out due to cost constraints<br>
+                                Catch sophisticated attacks hidden in "routine operational noise"<br>
+                                Complete attack timeline reconstruction
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">Optimizes data flow to analytics platforms but does not provide built-in security analysis capabilities</td>
+                            <td class="px-6 py-4 text-gray-700">Built-in security analytics with Cloud SIEM capabilities, threat intelligence integration, and automated security playbooks</td>
+                            <td class="px-6 py-4 text-red-600">
+                                Claims "70% faster incident response" and "autonomous cybersecurity"<br>
+                                <strong>TBC</strong> - real-world security outcomes vs. marketing claims<br>
+                                <strong>TBC</strong> - integration timeline and stability post-acquisition
+                            </td>
+                        </tr>
+                        <tr onclick="trackCompetitiveInteraction('RowClick', 'All', 'Implementation')" class="hover:bg-gray-50 cursor-pointer">
+                            <td class="px-6 py-4 font-medium text-gray-900">Implementation Complexity</td>
+                            <td class="px-6 py-4 text-blue-600">Rapid deployment with minimal disruption to existing security workflows and SIEM integrations</td>
+                            <td class="px-6 py-4 text-gray-700">Complex pipeline configuration requiring extensive planning and rule development</td>
+                            <td class="px-6 py-4 text-gray-700">Standard SaaS implementation with data migration and workflow adaptation requirements</td>
+                            <td class="px-6 py-4 text-red-600">
+                                <strong>TBC</strong> - post-acquisition integration timeline<br>
+                                <strong>TBC</strong> - complexity of unified CrowdStrike + Onum deployment<br>
+                                <em>Currently separate products awaiting integration</em>
+                            </td>
+                        </tr>
+                        <tr onclick="trackCompetitiveInteraction('RowClick', 'All', 'BestFitScenarios')" class="hover:bg-gray-50 cursor-pointer">
+                            <td class="px-6 py-4 font-medium text-gray-900">Best Fit Scenarios</td>
+                            <td class="px-6 py-4 text-blue-600">
+                                <strong>Security teams wanting enhanced detection without SIEM budget constraints</strong><br>
+                                Organizations processing high volumes of network security data in premium SIEM tiers<br>
+                                <em>"We're missing threats because we can't afford to ingest all our network data"</em>
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">Organizations routing observability data to multiple analytics and storage services, with needs for data pipeline optimization and transformation</td>
+                            <td class="px-6 py-4 text-gray-700">Organizations seeking comprehensive security operations and observability platform with unlimited data ingestion capabilities and built-in analytics</td>
+                            <td class="px-6 py-4 text-red-600">
+                                <strong>TBC</strong> - customer profiles beyond CrowdStrike's existing base<br>
+                                <strong>TBC</strong> - migration path for existing Onum customers<br>
+                                <em>"We trust AI-powered filtering won't miss critical security events"</em>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Key Differentiators Section -->
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg p-6 shadow-md" 
+                 onmouseover="startSectionTimer()" 
+                 onmouseout="endSectionTimer('LogiQoreDifferentiator')">
+                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
+                    <span class="text-white font-bold text-lg">LQ</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">LogiQore</h3>
+                <p class="text-gray-600"><strong>"Better security through economic advantage"</strong> - enhanced detection capabilities via complete data ingestion without traditional SIEM cost constraints</p>
+                <button onclick="trackCompetitiveAdvantage('Economic Security Advantage', 'LogiQore')" 
+                        class="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    Learn More →
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 shadow-md"
+                 onmouseover="startSectionTimer()" 
+                 onmouseout="endSectionTimer('CriblDifferentiator')">
+                <div class="w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center mb-4">
+                    <span class="text-white font-bold text-lg">C</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Cribl</h3>
+                <p class="text-gray-600">Intelligent data routing and transformation platform providing maximum flexibility for managing expensive downstream analytics tools</p>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 shadow-md"
+                 onmouseover="startSectionTimer()" 
+                 onmouseout="endSectionTimer('SumoDifferentiator')">
+                <div class="w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center mb-4">
+                    <span class="text-white font-bold text-lg">S</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Sumo Logic</h3>
+                <p class="text-gray-600">Comprehensive security operations platform with extensive out-of-the-box capabilities and enterprise-grade integrations</p>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 shadow-md border-2 border-red-200"
+                 onmouseover="startSectionTimer()" 
+                 onmouseout="endSectionTimer('CrowdStrikeOnumDifferentiator')">
+                <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mb-4">
+                    <span class="text-white font-bold text-lg">C+</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">CrowdStrike + Onum</h3>
+                <p class="text-gray-600"><strong>"Smart filtering for autonomous security"</strong> - promising integrated SIEM + pipeline with AI-powered data optimization <em class="text-red-600">(Aug 2025 - Integration TBC)</em></p>
+                <button onclick="trackCompetitiveAdvantage('Wait And See', 'CrowdStrike + Onum')" 
+                        class="mt-4 text-red-600 hover:text-red-700 text-sm font-medium">
+                    Wait & See →
+                </button>
+            </div>
+        </div>
+
+        <!-- Critical Disclaimers Section -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">Important Competitive Context</h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                        <p class="mb-2">This comparison represents our understanding of publicly available information about competitor capabilities. Both Cribl and Sumo Logic are established, well-funded companies with strong engineering teams and extensive customer bases.</p>
+                        <p class="mb-2"><strong>Cribl</strong> is recognized as an innovative leader in observability data pipeline optimization with significant market traction and investment backing.</p>
+                        <p class="mb-2"><strong>Sumo Logic</strong> is a public company (NASDAQ: SUMO) with enterprise customers worldwide and comprehensive security operations capabilities.</p>
+                        <p><strong>CrowdStrike + Onum</strong> represents a $290M acquisition announced August 2025, with integration timeline and capabilities still to be confirmed.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Security Enhancement Promise -->
+        <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-8 text-white text-center"
+             onclick="trackCompetitiveAdvantage('Security Enhancement Promise', 'All')">
+            <h2 class="text-2xl font-bold mb-4">The Security Enhancement Promise</h2>
+            <div class="grid md:grid-cols-4 gap-6 text-center">
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">LogiQore</h3>
+                    <p><em>"Catch more threats by affording to see more data - transform SIEM economics into security advantages"</em></p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Cribl</h3>
+                    <p><em>"Route data to multiple downstream analytics and storage services efficiently"</em></p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Sumo Logic</h3>
+                    <p><em>"Free unlimited log ingest with AI-powered continuous intelligence platform for DevSecOps"</em></p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">CrowdStrike + Onum</h3>
+                    <p><em>"Stop breaches at the speed of AI through smart filtering and autonomous cybersecurity"</em> <br><span class="text-red-200 text-sm">TBC - Real-world integration results</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Track page completion
+    window.addEventListener('beforeunload', function() {
+        appInsights.trackEvent({
+            name: 'CompetitiveComparisonCompleted',
+            properties: {
+                timeOnPage: Math.floor((Date.now() - performance.timing.navigationStart) / 1000).toString(),
+                engagementLevel: 'Completed',
+                timestamp: new Date().toISOString()
+            }
+        });
+    });
+    
+    // Track scroll depth
+    let maxScroll = 0;
+    window.addEventListener('scroll', function() {
+        const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+        if (scrollPercent > maxScroll) {
+            maxScroll = scrollPercent;
+            if (maxScroll % 25 === 0) { // Track at 25%, 50%, 75%, 100%
+                appInsights.trackEvent({
+                    name: 'ScrollDepth',
+                    properties: {
+                        scrollPercent: maxScroll.toString(),
+                        pageSection: maxScroll >= 75 ? 'Bottom' : maxScroll >= 50 ? 'Middle' : 'Top',
+                        timestamp: new Date().toISOString()
+                    }
+                });
+            }
+        }
+    });
+    </script>
+</body>
+</html>

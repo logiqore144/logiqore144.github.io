@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-NDA Calculator - LogiQore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-gray-800 mb-3">
+                    Post-NDA Calculator
+                </h1>
+                <p class="text-lg text-gray-600">
+                    LogiQore • Protected Access Tools
+                </p>
+            </div>
+        </div>
+
+        <!-- Authentication Status -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <div class="w-3 h-3 bg-amber-500 rounded-full mr-3"></div>
+                <h2 class="text-xl font-semibold text-gray-800">Authenticated Access</h2>
+            </div>
+            
+            <p class="text-gray-600 mb-6">
+                You have successfully authenticated and can access our advanced calculation tools. This section contains proprietary features available only to authorized users.
+            </p>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <p class="text-amber-700 text-sm text-center">
+                    🔒 You are viewing protected content - NDA agreement required
+                </p>
+            </div>
+        </div>
+
+        <!-- Tools Preview -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <div class="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
+                <h2 class="text-xl font-semibold text-gray-800">Advanced Tools</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="p-4 bg-gray-50 rounded-xl">
+                    <h3 class="font-semibold text-gray-800 mb-2">Enterprise ROI Calculator</h3>
+                    <p class="text-gray-600 text-sm">Advanced financial modeling tools</p>
+                    <span class="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Coming Soon</span>
+                </div>
+                
+                <div class="p-4 bg-gray-50 rounded-xl">
+                    <h3 class="font-semibold text-gray-800 mb-2">Risk Assessment Matrix</h3>
+                    <p class="text-gray-600 text-sm">Proprietary risk calculation algorithms</p>
+                    <span class="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Coming Soon</span>
+                </div>
+                
+                <div class="p-4 bg-gray-50 rounded-xl">
+                    <h3 class="font-semibold text-gray-800 mb-2">Custom Scenarios</h3>
+                    <p class="text-gray-600 text-sm">Build and save custom calculation models</p>
+                    <span class="inline-block mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <div class="flex items-center mb-6">
+                <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                <h2 class="text-xl font-semibold text-gray-800">Navigation</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <a href="/" class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group block">
+                    <span class="font-medium text-gray-700">← Back to Home</span>
+                </a>
+                
+                <a href="/public-calculator/" class="flex items-center justify-between p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors group block">
+                    <span class="font-medium text-gray-700">Public Calculator (Open Access)</span>
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8">
+            <p class="text-gray-500 text-sm">
+                LogiQore Protected Tools - Authorized Access Only
+            </p>
+        </div>
+    </div>
+
+    <!-- Application Insights -->
+    <script>
+        const script = document.createElement('script');
+        script.src = 'https://js.monitor.azure.com/scripts/b/ai.2.min.js';
+        script.onload = () => {
+            if (window.ApplicationInsights) {
+                const appInsights = new window.ApplicationInsights.ApplicationInsights({
+                    config: {
+                        connectionString: 'InstrumentationKey=22484255-46a4-4724-9a70-2bb590b2ccfd;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=87ea16f0-3dba-458a-a78f-861f25a67518',
+                        enableAutoRouteTracking: true,
+                        enableCorsCorrelation: true,
+                    }
+                });
+                appInsights.loadAppInsights();
+                appInsights.trackPageView();
+                
+                // Track protected page access
+                appInsights.trackEvent('ProtectedPageAccess', { 
+                    page: 'post_NDA_calculator',
+                    authenticated: true 
+                });
+                
+                window.appInsights = appInsights;
+            }
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

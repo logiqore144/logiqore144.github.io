@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiQore ROI Calculator - Microsoft Sentinel Cost Savings</title>
+    
+    <!-- Application Insights - MUST BE FIRST -->
+    <script>
+    !function(T,l,y){var S=T.location,k="script",D="instrumentationKey",C="ingestionendpoint",I="disableExceptionTracking",E="ai.device.",b="toLowerCase",w="crossOrigin",N="POST",e="appInsightsSDK",t=y.name||"appInsights";(y.name||T[e])&&(T[e]=t);var n=T[t]||function(d){var g=!1,f=!1,m={initialize:!0,queue:[],sv:"5",version:2,config:d};function v(e,t){var n={},a="Browser";return n[E+"id"]=a[b](),n[E+"type"]=a,n["ai.operation.name"]=S&&S.pathname||"_unknown_",n["ai.internal.sdkVersion"]="javascript:snippet_"+(m.sv||m.version),{time:function(){var a=new Date;function b(e){var t=""+e;return 1===t.length&&(t="0"+t),t}return a.getUTCFullYear()+"-"+b(1+a.getUTCMonth())+"-"+b(a.getUTCDate())+"T"+b(a.getUTCHours())+":"+b(a.getUTCMinutes())+":"+b(a.getUTCSeconds())+"."+(a.getUTCMilliseconds()/1e3).toFixed(3).slice(2,5)+"Z"}(),iKey:e,name:"Microsoft.ApplicationInsights."+t.replace(/-/g,"")+"."+n,sampleRate:100,tags:n,data:{baseData:{ver:2}}}}var h=d.url||y.src;if(h){function a(e){var t,n,a,i,r,o,s,c,u,p,l;g=!0,m.queue=[],f||(f=!0,t=h,s=function(){var e={},t=d.connectionString;if(t)for(var n=t.split(";"),a=0;a<n.length;a++){var i=n[a].split("=");2===i.length&&(e[i[0][b]()]=i[1])}if(!e[C]){var r=e.endpointsuffix,o=r?e.location:null;e[C]="https://"+(o?o+".":"")+"dc."+(r||"services.visualstudio.com")}return e}(),c=s[D]||d[D]||"",u=s[C],p=u?u+"/v2/track":d.endpointUrl,(l=[]).push((n="SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details)",a=t,i=p,(o=(r=v(c,"Exception")).data).baseType="ExceptionData",o.baseData.exceptions=[{typeName:"SDKLoadFailed",message:n.replace(/\./g,"-"),hasFullStack:!1,stack:n+"\nSnippet failed to load ["+a+"] -- Telemetry is disabled\nHelp Link: https://go.microsoft.com/fwlink/?linkid=2128109\nHost: "+(S&&S.pathname||"_unknown_")+"\nEndpoint: "+i,parsedStack:[]}],r)),l.push(function(e,t,n,a){var i=v(c,"Message"),r=i.data;r.baseType="MessageData";var o=r.baseData;return o.message='AI (Internal): 99 message:"'+("SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details) ("+n+")").replace(/\"/g,"")+'"',o.properties={endpoint:a},i}(0,0,t,p)),function(e,t){if(JSON){var n=T.fetch;if(n&&!y.useXhr)n(t,{method:N,body:JSON.stringify(e),mode:"cors"});else if(XMLHttpRequest){var a=new XMLHttpRequest;a.open(N,t),a.setRequestHeader("Content-type","application/json"),a.send(JSON.stringify(e))}}}(l,p))}function i(e,t){f||setTimeout(function(){!t&&m.core||a()},500)}var e=function(){var n=l.createElement(k);n.src=h;var e=y[w];return!e&&""!==e||"undefined"==n[w]||(n[w]=e),n.onload=i,n.onerror=a,n.onreadystatechange=function(e,t){"loaded"!==n.readyState&&"complete"!==n.readyState||i(0,t)},n}();y.ld<0?l.getElementsByTagName("head")[0].appendChild(e):setTimeout(function(){l.getElementsByTagName(k)[0].parentNode.insertBefore(e,l.getElementsByTagName(k)[0])},y.ld||0)}try{m.cookie=l.cookie}catch(p){}function t(e){for(;e.length;)!function(t){m[t]=function(){var e=arguments;g||m.queue.push(function(){m[t].apply(m,e)})}}(e.pop())}var n="track",r="TrackPage",o="TrackEvent";t([n+"Event",n+"PageView",n+"Exception",n+"Trace",n+"DependencyData",n+"Metric",n+"PageViewPerformance","start"+r,"stop"+r,"start"+o,"stop"+o,"addTelemetryInitializer","setAuthenticatedUserContext","clearAuthenticatedUserContext","flush"]),m.SeverityLevel={Verbose:0,Information:1,Warning:2,Error:3,Critical:4};var s=(d.extensionConfig||{}).ApplicationInsightsAnalytics||{};if(!0!==d[I]&&!0!==s[I]){var c="onerror";t(["_"+c]);var u=T[c];T[c]=function(e,t,n,a,i){var r=u&&u(e,t,n,a,i);return!0!==r&&m["_"+c]({message:e,url:t,lineNumber:n,columnNumber:a,error:i}),r},d.autoExceptionInstrumented=!0}return m}(y.cfg);function a(){y.onInit&&y.onInit(n)}(T[t]=n).queue&&0===n.queue.length?(n.queue.push(a),n.trackPageView({})):a()}(window,document,{
+        src: "https://js.monitor.azure.com/scripts/b/ai.2.min.js",
+        cfg: {
+            connectionString: "InstrumentationKey=22484255-46a4-4724-9a70-2bb590b2ccfd;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=87ea16f0-3dba-458a-a78f-861f25a67518"
+        }
+    });
+    
+    // Track page view with custom name
+    appInsights.trackPageView({ name: 'ROI Calculator' });
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* LogiQore Header Banner Styles */
+        .bg-white { background-color: white; }
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .border-b { border-bottom: 1px solid #e5e7eb; }
+        .max-w-6xl { max-width: 72rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .space-x-3 > * + * { margin-left: 0.75rem; }
+        .space-x-2 > * + * { margin-left: 0.5rem; }
+        .space-x-6 > * + * { margin-left: 1.5rem; }
+        .w-10 { width: 2.5rem; }
+        .h-10 { height: 2.5rem; }
+        .w-4 { width: 1rem; }
+        .h-4 { height: 1rem; }
+        .w-2 { width: 0.5rem; }
+        .h-2 { height: 0.5rem; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-green-500 { background-color: #10b981; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .text-white { color: white; }
+        .text-gray-900 { color: #111827; }
+        .text-gray-600 { color: #4b5563; }
+        .text-blue-600 { color: #2563eb; }
+        .text-blue-700 { color: #1d4ed8; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-sm { font-size: 0.875rem; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .font-medium { font-weight: 500; }
+        .hover\:text-blue-700:hover { color: #1d4ed8; }
+        .transition-colors { transition-property: color; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 0; /* Remove top padding to accommodate header */
+        }
+        
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto 0; /* Add top margin to separate from header */
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 48px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .calculator-body {
+            padding: 48px;
+        }
+        
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+        
+        @media (min-width: 1200px) {
+            .input-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 40px;
+            }
+        }
+        
+        .input-group {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 28px;
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group:focus-within {
+            border-color: #3b82f6;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .help-text {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        
+        .results-section {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            margin: 0 -48px;
+            padding: 48px;
+            color: white;
+        }
+        
+        .results-hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .results-hero h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .savings-amount {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #10b981;
+            text-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+            margin-bottom: 8px;
+        }
+        
+        .savings-percentage {
+            font-size: 1.5rem;
+            color: #60a5fa;
+            margin-bottom: 24px;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        @media (min-width: 1200px) {
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 32px;
+            }
+        }
+        
+        .result-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 16px;
+            padding: 28px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .result-card h3 {
+            color: #60a5fa;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+        
+        .result-subtitle {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        
+        .savings-breakdown {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: 32px;
+        }
+        
+        .breakdown-title {
+            color: #34d399;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .growth-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            margin: 48px -48px 0;
+            padding: 48px;
+            color: #92400e;
+        }
+        
+        .growth-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .projected-savings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .projection-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid rgba(217, 119, 6, 0.2);
+        }
+        
+        .projection-card h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+        
+        .projection-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #16a34a;
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            margin: 48px -48px 0;
+            padding: 48px;
+            text-align: center;
+            color: white;
+        }
+        
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cta-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 32px;
+            opacity: 0.9;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+        
+        .cta-button {
+            background: white;
+            color: #059669;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .cta-button.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .contact-form {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: 32px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+        
+        .contact-form.show {
+            display: block;
+        }
+        
+        .contact-form h3 {
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #374151;
+        }
+        
+        .form-group input::placeholder {
+            color: #6b7280;
+        }
+
+        .formspree-form {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 48px auto;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            color: #374151;
+        }
+
+        .formspree-form h3 {
+            color: #059669;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .formspree-form .subtitle {
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 32px;
+            font-size: 1.1rem;
+        }
+
+        .formspree-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .formspree-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .formspree-form .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .formspree-form input, 
+        .formspree-form textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .formspree-form input:focus, 
+        .formspree-form textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .formspree-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .formspree-form .submit-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .formspree-form .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .warning-banner {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 2px solid #f87171;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .warning-banner h3 {
+            color: #dc2626;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .warning-banner p {
+            color: #991b1b;
+            font-size: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .calculator-body {
+                padding: 24px;
+            }
+            
+            .results-section, .growth-section, .cta-section {
+                margin: 0 -24px;
+                padding: 32px 24px;
+            }
+            
+            .savings-amount {
+                font-size: 3rem;
+            }
+            
+            .cta-title {
+                font-size: 2rem;
+            }
+            
+            .input-section {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .cta-button {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .formspree-form .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .formspree-form {
+                padding: 24px;
+                margin: 32px auto;
+            }
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .calculator-container {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+            
+            .cta-section, .formspree-form {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LogiQore Header Banner -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-6xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">LQ</span>
+                    </div>
+                    <span class="text-xl font-semibold text-gray-900">LogiQore</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors" onclick="validateInput('NavigationClick', 'BackToPlatform')">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        <span class="text-sm font-medium">Back to Platform Overview</span>
+                    </a>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-sm text-gray-600">Platform Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="calculator-container">
+        <div class="header">
+            <h1>LogiQore ROI Calculator</h1>
+            <p>Calculate your Microsoft Sentinel cost savings</p>
+            <div class="subtitle">Professional estimate in under 3 minutes</div>
+        </div>
+        
+        <div class="calculator-body">
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #0ea5e9; border-radius: 16px; padding: 24px; margin-bottom: 32px; text-align: center;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;">
+                    <div style="font-size: 24px;">ℹ️</div>
+                    <h3 style="font-size: 1.2rem; font-weight: 600; color: #0c4a6e; margin: 0;">Important: Scope of Analysis</h3>
+                </div>
+                <p style="color: #0369a1; font-size: 1rem; line-height: 1.5; margin: 0;">
+                    This calculator covers <strong>network security logs only</strong> (firewalls, DNS, WAF). 
+                    Your existing Sentinel workspace continues handling Windows Events, Office 365, 
+                    and other standard connectors at current pricing.
+                </p>
+            </div>
+            
+            <div class="warning-banner" id="warningBanner" style="display: none;">
+                <h3>⚠️ High-Volume Alert</h3>
+                <p>Your data volume requires enterprise-grade cost optimization. Schedule a detailed analysis to unlock maximum savings potential.</p>
+            </div>
+            
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="dailyVolume">Daily Log Volume (GB)</label>
+                    <input type="number" id="dailyVolume" value="35" min="1" max="10000" step="1">
+                    <div class="help-text">Daily firewall, DNS, WAF logs only - excludes Windows Events, Office 365, and other Sentinel connectors</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="sentinelTier">Current Sentinel Pricing</label>
+                    <select id="sentinelTier">
+                        <option value="4.25">Pay-as-you-go - £4.25/GB</option>
+                        <option value="2.92">100GB Commitment - £2.92/GB effective</option>
+                        <option value="2.71">200GB Commitment - £2.71/GB effective</option>
+                        <option value="2.63">300GB Commitment - £2.63/GB effective</option>
+                        <option value="2.56">400GB Commitment - £2.56/GB effective</option>
+                        <option value="2.50">500GB Commitment - £2.50/GB effective</option>
+                        <option value="2.45">1TB Commitment - £2.45/GB effective</option>
+                    </select>
+                    <div class="help-text">Your current Microsoft Sentinel pricing tier</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="retentionDays">Log Retention (Days)</label>
+                    <select id="retentionDays">
+                        <option value="90" selected>90 Days (Standard)</option>
+                        <option value="180">180 Days</option>
+                        <option value="365">365 Days (1 Year)</option>
+                    </select>
+                    <div class="help-text">How long you retain logs for compliance/analysis</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="growthRate">Expected Growth Rate (%/month)</label>
+                    <input type="number" id="growthRate" value="3" min="0" max="50" step="0.1">
+                    <div class="help-text">Monthly log volume growth rate (optional)</div>
+                </div>
+            </div>
+            
+            <div class="results-section" id="resultsSection">
+                <div class="results-hero">
+                    <h2>Your Potential Savings</h2>
+                    <div class="savings-amount" id="savingsAmount">£2,473</div>
+                    <div class="savings-percentage" id="savingsPercentage">85% cost reduction per month</div>
+                </div>
+                
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>Current Monthly Cost</h3>
+                        <div class="result-value" id="currentCost">£2,898</div>
+                        <div class="result-subtitle">Microsoft Sentinel</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>LogiQore Monthly Cost</h3>
+                        <div class="result-value" id="logiqoreCost">£425</div>
+                        <div class="result-subtitle">Optimized infrastructure & Management Fee</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Annual Savings</h3>
+                        <div class="result-value" id="annualSavings">£29,676</div>
+                        <div class="result-subtitle">(inc management fee)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>3-Year Total</h3>
+                        <div class="result-value" id="threeYearSavings">£108,455</div>
+                        <div class="result-subtitle">(inc management fee)</div>
+                    </div>
+                </div>
+                
+                <div class="savings-breakdown">
+                    <div class="breakdown-title">Cost Breakdown - The Numbers Don't Lie</div>
+                    <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <span style="font-weight: 600;">Current Sentinel Cost (Network Logs):</span>
+                        <span id="sentinelBreakdown" style="font-weight: 700; font-size: 1.1rem; text-decoration: line-through; opacity: 0.7;">~£2,898</span>
+                        <span style="background: rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 4px 8px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; opacity: 0.8;">REPLACED</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center; padding: 16px 0; font-size: 1.2rem;">
+                        <span style="font-weight: 700; color: #10b981;">Your Total LogiQore Cost:</span>
+                        <span id="totalLogiqoreCost" style="font-weight: 800; font-size: 1.3rem; color: #10b981;">~£425</span>
+                        <span id="totalCostPercentage" style="background: linear-gradient(135deg, #10b981, #34d399); color: white; padding: 8px 12px; border-radius: 12px; font-size: 1rem; font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">~15%</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 16px 0; background: rgba(16, 185, 129, 0.1); border-radius: 12px; margin-top: 16px; padding-left: 20px; padding-right: 20px;">
+                        <span style="font-weight: 700; color: #10b981; font-size: 1.3rem;">Your Net Monthly Savings:</span>
+                        <span id="netSavings" style="font-weight: 800; font-size: 1.5rem; color: #10b981;">~£2,473</span>
+                    </div>
+                    <div style="text-align: center; margin-top: 16px; padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                        <div style="font-size: 1.1rem; font-weight: 600; color: #34d399; margin-bottom: 8px;">
+                            Commission Transparency
+                        </div>
+                        <div style="font-size: 0.95rem; color: #9ca3af; line-height: 1.4;">
+                            LogiQore only succeeds when you save money. Our management fee is <span id="commissionText" style="font-weight: 600; color: #10b981;">40%</span> of the savings we deliver - you keep the majority of every pound saved.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="growth-section" id="growthSection">
+                <div class="growth-title">Growth Impact Analysis</div>
+                <p style="text-align: center; margin-bottom: 32px; font-size: 1.1rem;">
+                    See how your savings compound with business growth
+                </p>
+                
+                <div class="projected-savings">
+                    <div class="projection-card">
+                        <h4>Month 6</h4>
+                        <div class="projection-value" id="month6Savings">£16,245</div>
+                    </div>
+                    <div class="projection-card">
+                        <h4>Month 12</h4>
+                        <div class="projection-value" id="month12Savings">£35,892</div>
+                    </div>
+                    <div class="projection-card">
+                        <h4>Month 18</h4>
+                        <div class="projection-value" id="month18Savings">£59,437</div>
+                    </div>
+                    <div class="projection-card">
+                        <h4>Month 24</h4>
+                        <div class="projection-value" id="month24Savings">£87,293</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Formspree Contact Form -->
+            <div class="formspree-form">
+                <h3>Ready to Unlock These Savings?</h3>
+                <p class="subtitle">Schedule your confidential analysis session - NDA protection available for enterprise discussions</p>
+                
+                <form action="https://formspree.io/f/mvgbovpj" method="POST" onsubmit="handleFormspreeSubmission(event)">
+                    <input type="hidden" name="_subject" value="LogiQore ROI Calculator - Analysis Request">
+                    <input type="hidden" name="_next" value="https://lively-ocean-057012f03.1.azurestaticapps.net/thank-you.html">
+                    
+                    <!-- Complete Deal Context -->
+                    <input type="hidden" name="estimated_monthly_savings" id="formSavings" value="">
+                    <input type="hidden" name="estimated_annual_savings" id="formAnnualSavings" value="">
+                    <input type="hidden" name="three_year_total_savings" id="formThreeYearSavings" value="">
+                    <input type="hidden" name="daily_volume_gb" id="formDailyVolume" value="">
+                    <input type="hidden" name="current_sentinel_pricing" id="formSentinelTier" value="">
+                    <input type="hidden" name="retention_days" id="formRetentionDays" value="">
+                    <input type="hidden" name="growth_rate_percent" id="formGrowthRate" value="">
+                    <input type="hidden" name="current_monthly_cost" id="formCurrentCost" value="">
+                    <input type="hidden" name="logiqore_monthly_cost" id="formLogiqoreCost" value="">
+                    <input type="hidden" name="commission_rate" id="formCommissionRate" value="">
+                    <input type="hidden" name="lead_score" id="formLeadScore" value="">
+                    <input type="hidden" name="timestamp" id="formTimestamp" value="">
+                    <input type="hidden" name="page_engagement_time" id="formEngagementTime" value="">
+                    <input type="hidden" name="calculator_interactions" id="formInteractions" value="">
+                    <input type="hidden" name="referrer_source" id="formReferrer" value="">
+                    <input type="hidden" name="device_info" id="formDeviceInfo" value="">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required placeholder="John Smith">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Business Email *</label>
+                            <input type="email" id="email" name="email" required placeholder="john.smith@company.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="company">Company Name *</label>
+                            <input type="text" id="company" name="company" required placeholder="Your Company Ltd">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+44 20 7123 4567">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Tell us about your current setup</label>
+                        <textarea id="message" name="message" placeholder="Current SIEM solution, main compliance requirements, timeline for implementation..."></textarea>
+                    </div>
+                    
+                    <!-- Consent Checkboxes -->
+                    <div style="margin: 24px 0; padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; cursor: pointer;">
+                                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                    <input type="checkbox" name="comprehensive_consent" required style="margin-top: 4px; flex-shrink: 0; width: 16px; height: 16px;">
+                                    <div style="flex: 1; font-size: 0.9rem; line-height: 1.5;">
+                                        I consent to LogiQore processing my data and confirm I have authority to discuss Microsoft Sentinel cost optimization for our organization's network security logs (firewall, DNS, WAF). I understand this will result in a scheduled technical consultation under mutual NDA protection.
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <!-- Expandable detailed terms -->
+                        <div style="margin-top: 16px;">
+                            <button type="button" id="expandTerms" onclick="toggleDetailedTerms()" style="background: none; border: none; color: #059669; font-size: 0.9rem; cursor: pointer; padding: 0; text-decoration: underline; display: flex; align-items: center; gap: 4px;">
+                                <span id="expandText">View detailed terms and conditions</span>
+                                <span id="expandIcon" style="font-size: 0.8rem; transition: transform 0.3s ease;">▼</span>
+                            </button>
+                            
+                            <div id="detailedTerms" style="display: none; margin-top: 16px; padding: 16px; background: rgba(255, 255, 255, 0.8); border-radius: 8px; border: 1px solid #d1d5db; font-size: 0.85rem; line-height: 1.4; color: #374151;">
+                                <div style="margin-bottom: 12px;">
+                                    <strong>Data Processing:</strong> Personal data will be stored securely and not shared with third parties without consent. <a href="/privacy-policy" target="_blank" style="color: #059669; text-decoration: underline;">Privacy Policy</a>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <strong>Technical Authority:</strong> You confirm technical authority or influence over SIEM infrastructure decisions and can participate in vendor evaluation discussions and budget planning conversations.
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <strong>Consultation Process:</strong> This request initiates a scheduled technical consultation call to validate savings estimates and assess implementation feasibility.
+                                </div>
+                                <div>
+                                    <strong>Legal Compliance:</strong> You have legal authority to execute mutual Non-Disclosure Agreements on behalf of your organization. LogiQore's standard bilateral NDA process will comply with your internal procurement and legal protocols. All technical consultations involving proprietary systems, compliance frameworks, and confidential business data will be conducted under legally binding confidentiality provisions prior to any substantive technical disclosure.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        📅 Schedule My Analysis Meeting
+                    </button>
+                    
+                    <div style="margin-top: 24px; padding: 20px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <h4 style="color: #059669; font-size: 1rem; font-weight: 600; margin-bottom: 12px;">What happens next?</h4>
+                        <div style="font-size: 0.9rem; color: #374151; line-height: 1.4;">
+                            <strong>Within 24 hours:</strong> Technical specialist reviews your configuration and schedules a 30-minute analysis call<br>
+                            <strong>Before the meeting:</strong> NDA signed if discussing proprietary infrastructure details<br>
+                            <strong>During the call:</strong> Detailed ROI validation, technical feasibility assessment, and implementation roadmap
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="cta-section">
+                <div class="cta-title">Alternative Ways to Connect</div>
+                <div class="cta-subtitle">Choose the option that works best for you</div>
+                
+                <div class="cta-buttons">
+                    <button class="cta-button secondary" onclick="emailResults()">
+                        📧 Email Results
+                    </button>
+                    <button class="cta-button secondary" onclick="downloadPDF()">
+                        📄 Download PDF
+                    </button>
+                </div>
+                
+                <!-- Comprehensive Disclaimer -->
+                <div style="background: rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 28px; margin: 32px 0; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 20px;">⚖️</div>
+                        <h4 style="font-size: 1.2rem; font-weight: 600; margin: 0; color: white;">Important Disclaimers</h4>
+                    </div>
+                    <div style="font-size: 0.95rem; color: rgba(255, 255, 255, 0.9); line-height: 1.5;">
+                        <p style="margin-bottom: 12px;">
+                            <strong>Estimates Only:</strong> All figures are approximate estimates (±15% variance) based on Microsoft's published pricing as of 2024. Actual costs may vary based on your specific configuration, region, currency fluctuations, and Microsoft pricing changes.
+                        </p>
+                        <p style="margin-bottom: 12px;">
+                            <strong>Scope Limitation:</strong> Calculations apply only to network security logs (firewalls, DNS, WAF). Windows Events, Office 365, and other Sentinel connectors are not included in these savings projections.
+                        </p>
+                        <p style="margin-bottom: 12px;">
+                            <strong>No Guarantees:</strong> LogiQore makes no warranties regarding projected savings. Final pricing depends on detailed technical assessment, implementation complexity, and specific requirements.
+                        </p>
+                        <p style="margin: 0;">
+                            <strong>Professional Consultation Required:</strong> This calculator provides initial estimates only. Formal proposals require comprehensive technical and commercial evaluation by LogiQore specialists.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="contact-form" id="contactForm">
+                    <h3>Get Your Detailed Cost Analysis</h3>
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" id="contactName" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Work Email" id="contactEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Company Name" id="contactCompany" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" placeholder="Phone (optional)" id="contactPhone">
+                    </div>
+                    <button class="cta-button" onclick="submitContactForm()" style="width: 100%; margin-top: 16px;">
+                        Send Analysis Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FIXED CALCULATION ENGINE - CLEAN & DEBUGGABLE
+        const calc = {
+            compute: function(dV, sR, rD, gR) {
+                const mGB = dV * 30;
+                const cCost = mGB * sR;
+                
+                // Fixed platform cost calculation
+                const basePlatformCostPerGB = 325;
+                const retentionMultiplier = 1 + (rD - 90) * 0.001;
+                const volumeScaleMultiplier = Math.min(1.2, 0.8 + (dV / 250));
+                const pCost = mGB * (basePlatformCostPerGB / 1000) * retentionMultiplier * volumeScaleMultiplier;
+                
+                const pSavings = Math.max(0, cCost - pCost);
+                
+                // Fixed commission rate calculation - smooth transitions
+                let cRate;
+                if (dV <= 15) {
+                    cRate = 0.40;
+                } else if (dV <= 45) {
+                    // Linear interpolation from 40% to 35% between 15-45GB
+                    cRate = 0.40 - ((dV - 15) / 30) * 0.05;
+                } else if (dV <= 500) {
+                    // Linear interpolation from 35% to 30% between 45-500GB
+                    cRate = 0.35 - ((dV - 45) / 455) * 0.05;
+                } else {
+                    cRate = 0.30;
+                }
+                
+                const mFee = pSavings * cRate;
+                const lCost = pCost + mFee;
+                const aSavings = Math.max(0, cCost - lCost);
+                
+                return {
+                    currentCost: cCost,
+                    logiqoreCost: lCost,
+                    platformCost: pCost,
+                    managementFee: mFee,
+                    monthlySavings: aSavings,
+                    potentialSavings: pSavings,
+                    commissionRate: cRate,
+                    growthProjections: this.projectGrowth(aSavings, gR)
+                };
+            },
+            
+            projectGrowth: function(bS, gR) {
+                const r = gR / 100;
+                const p = {};
+                [6,12,18,24,36].forEach(m => {
+                    let c = 0;
+                    for (let i = 1; i <= m; i++) {
+                        c += bS * Math.pow(1 + r, i - 1);
+                    }
+                    p[`month${m}`] = c;
+                });
+                return p;
+            }
+        };
+        
+        // APPLICATION INSIGHTS TRACKING FUNCTIONS
+        function trackCalculatorUsage(dailyVolume, sentinelRate, results) {
+            try {
+                appInsights.trackEvent({
+                    name: 'CalculatorUsed',
+                    properties: {
+                        dailyVolume: dailyVolume.toString(),
+                        sentinelTier: sentinelRate.toString(),
+                        estimatedMonthlySavings: results.monthlySavings.toString(),
+                        estimatedAnnualSavings: (results.monthlySavings * 12).toString(),
+                        retentionDays: document.getElementById('retentionDays').value,
+                        growthRate: document.getElementById('growthRate').value,
+                        timestamp: new Date().toISOString()
+                    }
+                });
+                
+                // Flag high-value prospects
+                if (results.monthlySavings > 5000) {
+                    appInsights.trackEvent({
+                        name: 'HighValueLead',
+                        properties: {
+                            monthlySavings: results.monthlySavings.toString(),
+                            annualSavings: (results.monthlySavings * 12).toString(),
+                            dailyGB: dailyVolume.toString(),
+                            leadScore: 'High'
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log('Tracking error:', e);
+            }
+        }
+        
+        function trackContactSubmission(name, email, company, source = 'ROI Calculator') {
+            try {
+                const currentSavings = document.getElementById('savingsAmount').textContent;
+                
+                appInsights.trackEvent({
+                    name: 'ContactSubmitted',
+                    properties: {
+                        source: source,
+                        estimatedSavings: currentSavings,
+                        company: company,
+                        contactMethod: 'Contact Form',
+                        formType: source === 'Formspree Form' ? 'Enhanced Form' : 'Legacy Form',
+                        timestamp: new Date().toISOString()
+                    }
+                });
+                
+                // Set authenticated user context for session tracking
+                appInsights.setAuthenticatedUserContext(email, company);
+            } catch (e) {
+                console.log('Tracking error:', e);
+            }
+        }
+        
+        function trackButtonClick(buttonName, location) {
+            try {
+                appInsights.trackEvent({
+                    name: 'ButtonClicked',
+                    properties: {
+                        buttonName: buttonName,
+                        pageLocation: location || 'calculator',
+                        timestamp: new Date().toISOString()
+                    }
+                });
+            } catch (e) {
+                console.log('Tracking error:', e);
+            }
+        }
+
+        // Behavioral tracking variables
+        let pageLoadTime = Date.now();
+        let calculatorInteractions = 0;
+        let lastCalculationResults = null;
+        let formStarted = false;
+        let formFieldsCompleted = [];
+        
+        // Track form abandonment (privacy-friendly - no PII captured)
+        function trackFormProgress() {
+            const completedFields = [];
+            if (document.getElementById('name').value.trim()) completedFields.push('name');
+            if (document.getElementById('email').value.trim()) completedFields.push('email');
+            if (document.getElementById('company').value.trim()) completedFields.push('company');
+            if (document.getElementById('phone').value.trim()) completedFields.push('phone');
+            if (document.getElementById('message').value.trim()) completedFields.push('message');
+            
+            // Check the single comprehensive consent checkbox
+            if (document.getElementsByName('comprehensive_consent')[0]?.checked) {
+                completedFields.push('comprehensive_consent');
+            }
+            
+            // Only track meaningful progress (not every keystroke)
+            if (completedFields.length !== formFieldsCompleted.length) {
+                formFieldsCompleted = completedFields;
+                
+                try {
+                    appInsights.trackEvent({
+                        name: 'FormProgress',
+                        properties: {
+                            fieldsCompleted: completedFields.length.toString(),
+                            completedFields: completedFields.join(','),
+                            calculatorInteractions: calculatorInteractions.toString(),
+                            engagementTime: Math.round((Date.now() - pageLoadTime) / 1000).toString(),
+                            estimatedSavings: lastCalculationResults ? lastCalculationResults.monthlySavings.toString() : 'unknown',
+                            leadScore: lastCalculationResults ? (lastCalculationResults.monthlySavings > 5000 ? 'High' : lastCalculationResults.monthlySavings > 2000 ? 'Medium' : 'Standard') : 'unknown',
+                            dailyVolumeGB: document.getElementById('dailyVolume').value,
+                            abandonmentRisk: completedFields.length > 3 && completedFields.length < 6 ? 'High' : 'Low'
+                        }
+                    });
+                } catch (e) {
+                    console.log('Tracking error:', e);
+                }
+            }
+        }
+        
+        // Track calculator engagement every 30 seconds
+        setInterval(function() {
+            if (calculatorInteractions > 0) {
+                try {
+                    appInsights.trackEvent({
+                        name: 'CalculatorEngagement',
+                        properties: {
+                            interactions: calculatorInteractions.toString(),
+                            timeOnPage: Math.round((Date.now() - pageLoadTime) / 1000).toString(),
+                            currentSavings: lastCalculationResults ? lastCalculationResults.monthlySavings.toString() : 'unknown',
+                            dailyVolumeGB: document.getElementById('dailyVolume').value,
+                            formStarted: formStarted.toString()
+                        }
+                    });
+                } catch (e) {
+                    console.log('Tracking error:', e);
+                }
+            }
+        }, 30000);
+        
+        // Handle Formspree form submission with complete deal context
+        function handleFormspreeSubmission(event) {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const company = document.getElementById('company').value;
+            
+            // Get current calculation values
+            const dailyVolume = parseFloat(document.getElementById('dailyVolume').value) || 35;
+            const sentinelRate = parseFloat(document.getElementById('sentinelTier').value) || 4.25;
+            const retentionDays = parseInt(document.getElementById('retentionDays').value) || 90;
+            const growthRate = parseFloat(document.getElementById('growthRate').value) || 3;
+            
+            // Get current results
+            const results = calc.compute(dailyVolume, sentinelRate, retentionDays, growthRate);
+            
+            // Calculate behavioral metrics
+            const engagementTime = Math.round((Date.now() - pageLoadTime) / 1000); // seconds
+            const deviceInfo = `${navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'} | ${screen.width}x${screen.height} | ${navigator.platform}`;
+            
+            // Populate ALL hidden fields with complete deal context
+            document.getElementById('formSavings').value = document.getElementById('savingsAmount').textContent;
+            document.getElementById('formAnnualSavings').value = document.getElementById('annualSavings').textContent;
+            document.getElementById('formThreeYearSavings').value = document.getElementById('threeYearSavings').textContent;
+            document.getElementById('formDailyVolume').value = dailyVolume;
+            document.getElementById('formSentinelTier').value = `${sentinelRate} GBP/GB (${getSentinelTierName(sentinelRate)})`;
+            document.getElementById('formRetentionDays').value = retentionDays;
+            document.getElementById('formGrowthRate').value = growthRate;
+            document.getElementById('formCurrentCost').value = document.getElementById('currentCost').textContent;
+            document.getElementById('formLogiqoreCost').value = document.getElementById('logiqoreCost').textContent;
+            document.getElementById('formCommissionRate').value = `${Math.round(results.commissionRate * 100)}%`;
+            document.getElementById('formLeadScore').value = results.monthlySavings > 5000 ? 'High Value (>£5k/month)' : 
+                                                            results.monthlySavings > 2000 ? 'Medium Value (£2k-5k/month)' : 
+                                                            'Standard Value (<£2k/month)';
+            document.getElementById('formTimestamp').value = new Date().toISOString();
+            document.getElementById('formEngagementTime').value = `${engagementTime} seconds`;
+            document.getElementById('formInteractions').value = `${calculatorInteractions} input changes`;
+            document.getElementById('formReferrer').value = document.referrer || 'Direct/Unknown';
+            document.getElementById('formDeviceInfo').value = deviceInfo;
+            
+            // Track the submission
+            trackContactSubmission(name, email, company, 'Formspree Form');
+            
+            // Let form submit naturally to Formspree
+        }
+        
+        // Navigation tracking function for header banner
+        function validateInput(eventType, action) {
+            try {
+                appInsights.trackEvent({
+                    name: eventType,
+                    properties: {
+                        action: action,
+                        timestamp: new Date().toISOString(),
+                        pageLocation: 'ROI Calculator'
+                    }
+                });
+            } catch (e) {
+                console.log('Navigation tracking error:', e);
+            }
+        }
+        
+        // Toggle detailed terms visibility
+        function toggleDetailedTerms() {
+            const detailedTerms = document.getElementById('detailedTerms');
+            const expandText = document.getElementById('expandText');
+            const expandIcon = document.getElementById('expandIcon');
+            
+            if (detailedTerms.style.display === 'none' || !detailedTerms.style.display) {
+                detailedTerms.style.display = 'block';
+                expandText.textContent = 'Hide detailed terms and conditions';
+                expandIcon.style.transform = 'rotate(180deg)';
+                
+                // Track expansion
+                try {
+                    appInsights.trackEvent({
+                        name: 'DetailedTermsExpanded',
+                        properties: {
+                            timestamp: new Date().toISOString(),
+                            engagementTime: Math.round((Date.now() - pageLoadTime) / 1000).toString()
+                        }
+                    });
+                } catch (e) {
+                    console.log('Tracking error:', e);
+                }
+            } else {
+                detailedTerms.style.display = 'none';
+                expandText.textContent = 'View detailed terms and conditions';
+                expandIcon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        // Helper function to get readable Sentinel tier name
+        function getSentinelTierName(rate) {
+            const tiers = {
+                '4.25': 'Pay-as-you-go',
+                '2.92': '100GB Commitment',
+                '2.71': '200GB Commitment', 
+                '2.63': '300GB Commitment',
+                '2.56': '400GB Commitment',
+                '2.50': '500GB Commitment',
+                '2.45': '1TB Commitment'
+            };
+            return tiers[rate.toString()] || 'Custom Tier';
+        }
+        
+        function updateCalculations() {
+            const dailyVolume = parseFloat(document.getElementById('dailyVolume').value) || 35;
+            const sentinelRate = parseFloat(document.getElementById('sentinelTier').value) || 4.25;
+            const retentionDays = parseInt(document.getElementById('retentionDays').value) || 90;
+            const growthRate = parseFloat(document.getElementById('growthRate').value) || 3;
+            
+            // Show high-volume warning
+            const warningBanner = document.getElementById('warningBanner');
+            if (dailyVolume >= 79) {
+                warningBanner.style.display = 'block';
+            } else {
+                warningBanner.style.display = 'none';
+            }
+            
+            const results = calc.compute(dailyVolume, sentinelRate, retentionDays, growthRate);
+            lastCalculationResults = results; // Store for behavioral tracking
+            
+            // Update display
+            const currencyFormat = new Intl.NumberFormat('en-GB', {
+                style: 'currency',
+                currency: 'GBP',
+                maximumFractionDigits: 0
+            });
+            
+            document.getElementById('currentCost').textContent = currencyFormat.format(results.currentCost);
+            document.getElementById('logiqoreCost').textContent = currencyFormat.format(results.logiqoreCost);
+            document.getElementById('savingsAmount').textContent = currencyFormat.format(results.monthlySavings);
+            document.getElementById('annualSavings').textContent = currencyFormat.format(results.monthlySavings * 12);
+            document.getElementById('threeYearSavings').textContent = currencyFormat.format(results.growthProjections.month36);
+            
+            const savingsPercent = results.currentCost > 0 ? 
+                Math.round((results.monthlySavings / results.currentCost) * 100) : 0;
+            document.getElementById('savingsPercentage').textContent = `${savingsPercent}% cost reduction per month`;
+            
+            // Update breakdown
+            document.getElementById('sentinelBreakdown').textContent = currencyFormat.format(results.currentCost);
+            document.getElementById('totalLogiqoreCost').textContent = currencyFormat.format(results.logiqoreCost);
+            document.getElementById('netSavings').textContent = currencyFormat.format(results.monthlySavings);
+            
+            const commissionPercent = Math.round(results.commissionRate * 100);
+            document.getElementById('totalCostPercentage').textContent = `${100 - savingsPercent}% of original`;
+            document.getElementById('commissionText').textContent = `${commissionPercent}%`;
+            
+            // Update growth projections
+            document.getElementById('month6Savings').textContent = currencyFormat.format(results.growthProjections.month6);
+            document.getElementById('month12Savings').textContent = currencyFormat.format(results.growthProjections.month12);
+            document.getElementById('month18Savings').textContent = currencyFormat.format(results.growthProjections.month18);
+            document.getElementById('month24Savings').textContent = currencyFormat.format(results.growthProjections.month24);
+            
+            // TRACK CALCULATOR USAGE
+            trackCalculatorUsage(dailyVolume, sentinelRate, results);
+        }
+        
+        function showContactForm() {
+            trackButtonClick('Get Detailed Analysis');
+            const form = document.getElementById('contactForm');
+            form.classList.add('show');
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function submitContactForm() {
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const company = document.getElementById('contactCompany').value;
+            
+            if (!name || !email || !company) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // TRACK CONTACT SUBMISSION
+            trackContactSubmission(name, email, company, 'Legacy Form');
+            
+            alert('Thank you! We\'ll send your detailed analysis within 24 hours.');
+            document.getElementById('contactForm').innerHTML = 
+                '<div style="text-align: center; color: white; font-size: 1.2rem;">✅ Analysis request sent successfully!</div>';
+        }
+        
+        function emailResults() {
+            trackButtonClick('Email Results');
+            const dailyVolume = document.getElementById('dailyVolume').value;
+            const savings = document.getElementById('savingsAmount').textContent;
+            
+            const subject = encodeURIComponent(`LogiQore ROI Analysis - ${savings} monthly savings`);
+            const body = encodeURIComponent(`Hi,
+
+I've calculated potential savings with LogiQore for my ${dailyVolume}GB/day log volume:
+
+Monthly Savings: ${savings}
+Annual Savings: ${document.getElementById('annualSavings').textContent}
+
+I'd like to discuss a detailed implementation plan.
+
+Best regards`);
+            
+            window.location.href = `mailto:sales@logiqore.com?subject=${subject}&body=${body}`;
+        }
+        
+        function downloadPDF() {
+            trackButtonClick('Download PDF');
+            window.print();
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCalculations();
+            
+            // Track interactions on input changes
+            document.getElementById('dailyVolume').addEventListener('input', function() {
+                calculatorInteractions++;
+                updateCalculations();
+            });
+            document.getElementById('sentinelTier').addEventListener('change', function() {
+                calculatorInteractions++;
+                updateCalculations();
+            });
+            document.getElementById('retentionDays').addEventListener('change', function() {
+                calculatorInteractions++;
+                updateCalculations();
+            });
+            document.getElementById('growthRate').addEventListener('input', function() {
+                calculatorInteractions++;
+                updateCalculations();
+            });
+            
+            // Track form progress (without capturing PII until consent given)
+            const formFields = ['name', 'email', 'company', 'phone', 'message'];
+            formFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                field.addEventListener('focus', function() {
+                    if (!formStarted) {
+                        formStarted = true;
+                        try {
+                            appInsights.trackEvent({
+                                name: 'FormStarted',
+                                properties: {
+                                    timeOnPage: Math.round((Date.now() - pageLoadTime) / 1000).toString(),
+                                    calculatorInteractions: calculatorInteractions.toString(),
+                                    estimatedSavings: lastCalculationResults ? lastCalculationResults.monthlySavings.toString() : 'unknown'
+                                }
+                            });
+                        } catch (e) {
+                            console.log('Tracking error:', e);
+                        }
+                    }
+                });
+                
+                field.addEventListener('blur', function() {
+                    if (field.value.trim()) {
+                        trackFormProgress();
+                    }
+                });
+            });
+            
+            // Track checkbox changes
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    trackFormProgress();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

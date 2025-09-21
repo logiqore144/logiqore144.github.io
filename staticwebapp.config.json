@@ -1,0 +1,18 @@
+{
+  "routes": [
+    {
+      "route": "/api/*",
+      "rewrite": "https://logiqore-functions-v2.azurewebsites.net/api/*"
+    },
+    {
+      "route": "/post_NDA_calculator/*",
+      "allowedRoles": ["authenticated"]
+    }
+  ],
+  "responseOverrides": {
+    "401": {
+      "redirect": "/.auth/login/aad",
+      "statusCode": 302
+    }
+  }
+}

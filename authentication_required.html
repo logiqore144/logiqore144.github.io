@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Required - LogiQore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Application Insights - SECURITY MONITORING -->
+    <script>
+    !function(T,l,y){var S=T.location,k="script",D="instrumentationKey",C="ingestionendpoint",I="disableExceptionTracking",E="ai.device.",b="toLowerCase",w="crossOrigin",N="POST",e="appInsightsSDK",t=y.name||"appInsights";(y.name||T[e])&&(T[e]=t);var n=T[t]||function(d){var g=!1,f=!1,m={initialize:!0,queue:[],sv:"5",version:2,config:d};function v(e,t){var n={},a="Browser";return n[E+"id"]=a[b](),n[E+"type"]=a,n["ai.operation.name"]=S&&S.pathname||"_unknown_",n["ai.internal.sdkVersion"]="javascript:snippet_"+(m.sv||m.version),{time:function(){var a=new Date;function b(e){var t=""+e;return 1===t.length&&(t="0"+t),t}return a.getUTCFullYear()+"-"+b(1+a.getUTCMonth())+"-"+b(a.getUTCDate())+"T"+b(a.getUTCHours())+":"+b(a.getUTCMinutes())+":"+b(a.getUTCSeconds())+"."+(a.getUTCMilliseconds()/1e3).toFixed(3).slice(2,5)+"Z"}(),iKey:e,name:"Microsoft.ApplicationInsights."+t.replace(/-/g,"")+"."+n,sampleRate:100,tags:n,data:{baseData:{ver:2}}}}var h=d.url||y.src;if(h){function a(e){var t,n,a,i,r,o,s,c,u,p,l;g=!0,m.queue=[],f||(f=!0,t=h,s=function(){var e={},t=d.connectionString;if(t)for(var n=t.split(";"),a=0;a<n.length;a++){var i=n[a].split("=");2===i.length&&(e[i[0][b]()]=i[1])}if(!e[C]){var r=e.endpointsuffix,o=r?e.location:null;e[C]="https://"+(o?o+".":"")+"dc."+(r||"services.visualstudio.com")}return e}(),c=s[D]||d[D]||"",u=s[C],p=u?u+"/v2/track":d.endpointUrl,(l=[]).push((n="SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details)",a=t,i=p,(o=(r=v(c,"Exception")).data).baseType="ExceptionData",o.baseData.exceptions=[{typeName:"SDKLoadFailed",message:n.replace(/\./g,"-"),hasFullStack:!1,stack:n+"\nSnippet failed to load ["+a+"] -- Telemetry is disabled\nHelp Link: https://go.microsoft.com/fwlink/?linkid=2128109\nHost: "+(S&&S.pathname||"_unknown_")+"\nEndpoint: "+i,parsedStack:[]}],r)),l.push(function(e,t,n,a){var i=v(c,"Message"),r=i.data;r.baseType="MessageData";var o=r.baseData;return o.message='AI (Internal): 99 message:"'+("SDK LOAD Failure: Failed to load Application Insights SDK script (See stack for details) ("+n+")").replace(/\"/g,"")+'"',o.properties={endpoint:a},i}(0,0,t,p)),function(e,t){if(JSON){var n=T.fetch;if(n&&!y.useXhr)n(t,{method:N,body:JSON.stringify(e),mode:"cors"});else if(XMLHttpRequest){var a=new XMLHttpRequest;a.open(N,t),a.setRequestHeader("Content-type","application/json"),a.send(JSON.stringify(e))}}}(l,p))}function i(e,t){f||setTimeout(function(){!t&&m.core||a()},500)}var e=function(){var n=l.createElement(k);n.src=h;var e=y[w];return!e&&""!==e||"undefined"==n[w]||(n[w]=e),n.onload=i,n.onerror=a,n.onreadystatechange=function(e,t){"loaded"!==n.readyState&&"complete"!==n.readyState||i(0,t)},n}();y.ld<0?l.getElementsByTagName("head")[0].appendChild(e):setTimeout(function(){l.getElementsByTagName(k)[0].parentNode.insertBefore(e,l.getElementsByTagName(k)[0])},y.ld||0)}try{m.cookie=l.cookie}catch(p){}function t(e){for(;e.length;)!function(t){m[t]=function(){var e=arguments;g||m.queue.push(function(){m[t].apply(m,e)})}}(e.pop())}var n="track",r="TrackPage",o="TrackEvent";t([n+"Event",n+"PageView",n+"Exception",n+"Trace",n+"DependencyData",n+"Metric",n+"PageViewPerformance","start"+r,"stop"+r,"start"+o,"stop"+o,"addTelemetryInitializer","setAuthenticatedUserContext","clearAuthenticatedUserContext","flush"]),m.SeverityLevel={Verbose:0,Information:1,Warning:2,Error:3,Critical:4};var s=(d.extensionConfig||{}).ApplicationInsightsAnalytics||{};if(!0!==d[I]&&!0!==s[I]){var c="onerror";t(["_"+c]);var u=T[c];T[c]=function(e,t,n,a,i){var r=u&&u(e,t,n,a,i);return!0!==r&&m["_"+c]({message:e,url:t,lineNumber:n,columnNumber:a,error:i}),r},d.autoExceptionInstrumented=!0}return m}(y.cfg);function a(){y.onInit&&y.onInit(n)}(T[t]=n).queue&&0===n.queue.length?(n.queue.push(a),n.trackPageView({})):a()}(window,document,{
+        src: "https://js.monitor.azure.com/scripts/b/ai.2.min.js",
+        cfg: {
+            connectionString: "InstrumentationKey=7e6b5832-fa2b-4436-9f0f-8744afd1eae9;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=afe779d3-7128-4628-95f6-2c239c1f82f8"
+        }
+    });
+
+    // Security monitoring - operational security implementation
+    function trackUnauthorizedAccess() {
+        const securityEvent = {
+            name: atob('VW5hdXRob3JpemVkQWNjZXNzQXR0ZW1wdA=='),
+            properties: {}
+        };
+        
+        securityEvent.properties[atob('cGFnZQ==')] = window.location.pathname;
+        securityEvent.properties[atob('cmVmZXJyZXI=')] = document.referrer || atob('ZGlyZWN0X2FjY2Vzcw==');
+        securityEvent.properties[atob('dGltZXN0YW1w')] = new Date().toISOString();
+        securityEvent.properties[atob('dXNlckFnZW50')] = navigator.userAgent;
+        securityEvent.properties[atob('YWNjZXNzTWV0aG9k')] = document.referrer ? atob('cmVmZXJyZXI=') : 'direct_url';
+        securityEvent.properties[atob('dGFyZ2V0UmVzb3VyY2U=')] = window.location.href;
+        securityEvent.properties[atob('c2VjdXJpdHlMZXZlbA==')] = atob('cHJvdGVjdGVkX2NvbnRlbnQ=');
+        
+        appInsights.trackEvent(securityEvent);
+        
+        appInsights.trackMetric({
+            name: atob('U2VjdXJpdHlCcmVhY2hfRGlyZWN0QWNjZXNz'),
+            value: 1,
+            properties: {
+                [atob('c2V2ZXJpdHk=')]: atob('bWVkaXVt'),
+                [atob('Y2F0ZWdvcnk=')]: atob('aXBfcHJvdGVjdGlvbg==')
+            }
+        });
+    }
+
+    function trackSecurityAction(action, destination) {
+        const actionEvent = {
+            name: atob('U2VjdXJpdHlQYWdlQWN0aW9u'),
+            properties: {}
+        };
+        
+        actionEvent.properties[atob('YWN0aW9u')] = action;
+        actionEvent.properties[atob('ZGVzdGluYXRpb24=')] = destination;
+        actionEvent.properties[atob('ZnJvbVBhZ2U=')] = atob('YXV0aGVudGljYXRpb25fcmVxdWlyZWQ=');
+        actionEvent.properties[atob('dGltZXN0YW1w')] = new Date().toISOString();
+        
+        appInsights.trackEvent(actionEvent);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        trackUnauthorizedAccess();
+        
+        appInsights.trackPageView({
+            name: atob('QXV0aGVudGljYXRpb25SZXF1aXJlZA=='),
+            properties: {
+                securityEvent: true,
+                protectedResource: true,
+                accessBlocked: true
+            }
+        });
+    });
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
+        <!-- Logo -->
+        <div class="flex items-center justify-center mb-8">
+            <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                <span class="text-white font-bold text-lg">LQ</span>
+            </div>
+            <span class="text-2xl font-semibold text-gray-900">LogiQore</span>
+        </div>
+        
+        <!-- Lock Icon -->
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+            </svg>
+        </div>
+        
+        <!-- Content -->
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h1>
+        <p class="text-gray-600 mb-6">
+            This content is restricted to qualified MSP partners under commercial engagement. 
+            Direct access to protected resources is not permitted.
+        </p>
+        
+        <!-- Status Info -->
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+            <h3 class="font-semibold text-orange-900 mb-2">Access Restriction Notice</h3>
+            <p class="text-orange-800 text-sm">
+                Our competitive intelligence and technical documentation requires proper authentication 
+                to protect intellectual property and ensure qualified partner engagement.
+            </p>
+        </div>
+        
+        <!-- Actions -->
+        <div class="space-y-3">
+            <a href="/" 
+               onclick="trackSecurityAction('return_to_main', '/')"
+               class="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                Return to Main Site
+            </a>
+            <a href="/request_access.html" 
+               onclick="trackSecurityAction('request_access', '/request_access.html')"
+               class="block w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors">
+                Request Partner Access
+            </a>
+        </div>
+        
+        <!-- Professional Contact -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <p class="text-xs text-gray-500">
+                For partnership inquiries and commercial engagement:<br/>
+                <strong>Qualified MSP partners only</strong>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ben Smith - Cybersecurity Transformation & Migration Specialist</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+        
+        .landscape-container {
+            width: 95vw;
+            height: 53.4vw;
+            max-width: 1600px;
+            max-height: 900px;
+            min-width: 800px;
+            min-height: 450px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 35% 65%;
+            position: relative;
+        }
+        
+        .profile-left {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e3a8a 100%);
+            padding: 4% 3%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .photo-container {
+            width: 150px;
+            height: 150px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+        
+        .photo-container img {
+            width: 130%;
+            height: 130%;
+            object-fit: cover;
+            object-position: 50% 35%;
+            margin-top: -18px;
+            margin-left: -18px;
+        }
+        
+        .profile-header {
+            position: relative;
+            z-index: 2;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .profile-name {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+        
+        .profile-title {
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.9;
+            line-height: 1.3;
+            margin-bottom: 20px;
+        }
+        
+        .contact-details {
+            position: relative;
+            z-index: 2;
+            color: white;
+            text-align: left;
+            width: 100%;
+        }
+        
+        .contact-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .contact-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            opacity: 0.8;
+        }
+        
+        .profile-right {
+            padding: 5% 6%;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        
+        .innovation-tag {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+            z-index: 10;
+        }
+        
+        .main-headline {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 16px;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .value-statement {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+        
+        .impact-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-box {
+            text-align: center;
+            padding: 16px 12px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-box:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+        }
+        
+        .metric-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #3b82f6;
+            margin-bottom: 4px;
+        }
+        
+        .metric-desc {
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.2;
+        }
+        
+        .experience-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .experience-header::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            border-radius: 2px;
+        }
+        
+        .experience-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px;
+            flex: 1;
+        }
+        
+        .experience-card {
+            padding: 16px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .experience-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .exp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .exp-company {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 13px;
+        }
+        
+        .exp-period {
+            font-size: 9px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .exp-role {
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+        
+        .exp-impact {
+            font-size: 10px;
+            color: #475569;
+            line-height: 1.4;
+        }
+        
+        .exp-impact strong {
+            color: #059669;
+            font-weight: 700;
+        }
+        
+        .footer-skills {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .skill-tags {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .skill-tag {
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .cert-tag {
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        @media print {
+            html, body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .landscape-container {
+                width: 297mm;
+                height: 210mm;
+                max-width: none;
+                max-height: none;
+                min-width: none;
+                min-height: none;
+                box-shadow: none;
+                border: 1px solid #e2e8f0;
+            }
+        }
+    </style>
+    <script>
+        (function(){
+            var a=atob('N2U2YjU4MzItZmEyYi00NDM2LTlmMGYtODc0NGFmZDFlYWU5'),
+            b=atob('aHR0cHM6Ly9kYy5zZXJ2aWNlcy52aXN1YWxzdHVkaW8uY29tL3YyL3RyYWNr'),
+            c=function(){return+new Date()},
+            d=function(){return'xxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g,function(e){var f=Math.random()*16|0,g=e=='x'?f:(f&0x3|0x8);return g.toString(16)})},
+            e=function(f,g){var h=new XMLHttpRequest();h.open('POST',b);h.setRequestHeader('Content-Type','application/json');h.send(JSON.stringify({name:f,time:new Date().toISOString(),iKey:a,data:{baseType:'EventData',baseData:{name:f,properties:g||{}}}}))},
+            i=function(){return navigator.userAgent},
+            j=function(){return screen.width+'x'+screen.height},
+            k=function(){return window.location.href},
+            l=function(){return window.location.pathname},
+            m=function(){return document.referrer||'direct'};
+            
+            var n={v:d(),u:i(),s:j(),h:k(),p:l(),r:m(),t:c()};
+            e(atob('cGFnZV92aWV3'),n);
+            
+            document.addEventListener('click',function(o){
+                var p=o.target.tagName.toLowerCase(),q=o.target.className||'',r=o.target.textContent.substring(0,50)||'';
+                e(atob('Y2xpY2tfZXZlbnQ'),{el:p,cls:q,txt:r,x:o.clientX,y:o.clientY,v:n.v,t:c()})
+            });
+            
+            var s=0;document.addEventListener('scroll',function(){if(c()-s>1000){s=c();e(atob('c2Nyb2xsX2V2ZW50'),{pos:window.scrollY,h:document.body.scrollHeight,v:n.v,t:c()})}});
+            
+            window.addEventListener('beforeunload',function(){var t=c()-n.t;e(atob('c2Vzc2lvbl9lbmQ='),{dur:t,v:n.v,t:c()})});
+            
+            setTimeout(function(){e(atob('ZW5nYWdlbWVudA=='),{type:'30s',v:n.v,t:c()})},30000);
+            setTimeout(function(){e(atob('ZW5nYWdlbWVudA=='),{type:'60s',v:n.v,t:c()})},60000);
+            
+            var u=['mouseenter','mouseleave','focus','blur','resize'];
+            u.forEach(function(v){window.addEventListener(v,function(w){e(atob('aW50ZXJhY3Rpb25fZXZlbnQ='),{type:v,v:n.v,t:c()})})});
+            
+            if('ontouchstart' in window){document.addEventListener('touchstart',function(x){e(atob('dG91Y2hfZXZlbnQ='),{type:'start',v:n.v,t:c()})});document.addEventListener('touchend',function(y){e(atob('dG91Y2hfZXZlbnQ='),{type:'end',v:n.v,t:c()})})}
+        })();
+    </script>
+</head>
+<body>
+    <div class="landscape-container">
+        <div class="innovation-tag">Patent Holder & Innovator</div>
+        
+        <div class="profile-left">
+            <div class="photo-container">
+                <img src="./benheadshot.jpg" alt="Ben Smith Professional Headshot" />
+            </div>
+            
+            <div class="profile-header">
+                <div class="profile-name">Ben Smith</div>
+                <div class="profile-title">Cybersecurity Transformation & Migration Specialist</div>
+            </div>
+            
+            <div class="contact-details">
+                <div class="contact-row">
+                    <svg class="contact-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                    </svg>
+                    bjs144@gmail.com
+                </div>
+                <div class="contact-row">
+                    <svg class="contact-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                    </svg>
+                    07930 225238
+                </div>
+                <div class="contact-row">
+                    <svg class="contact-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                    </svg>
+                    Huddersfield, West Yorkshire
+                </div>
+                <div class="contact-row">
+                    <svg class="contact-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2zm4-3a1 1 0 00-1 1v1h2V4a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    British National
+                </div>
+            </div>
+        </div>
+        
+        <div class="profile-right">
+            <div class="main-headline">Cybersecurity Transformation & Migration Specialist</div>
+            <div class="value-statement">
+                I architect and execute complex cybersecurity transformations, specializing in MSSP migrations, SIEM implementations, and enterprise security redesign. From Invitation to Tender (ITT) through contract award and implementation, I deliver end-to-end transformation programs that modernize security operations while maintaining business continuity.
+            </div>
+            
+            <div class="impact-metrics">
+                <div class="metric-box">
+                    <div class="metric-value">15+</div>
+                    <div class="metric-desc">MSSP & SIEM<br>Migrations</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">Patent</div>
+                    <div class="metric-desc">Named on<br>Application</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">£200k+</div>
+                    <div class="metric-desc">Cost Savings<br>Delivered</div>
+                </div>
+            </div>
+            
+            <div class="experience-header">Core Expertise & Specializations</div>
+            <div class="experience-showcase">
+                <div class="experience-card">
+                    <div class="exp-header">
+                        <div class="exp-company">MSSP Migration</div>
+                        <div class="exp-period">Expert</div>
+                    </div>
+                    <div class="exp-role">End-to-End Migration Specialist</div>
+                    <div class="exp-impact">Complete <strong>ITT processes</strong>, bid evaluation & scoring, contract negotiation through to <strong>successful implementation</strong></div>
+                </div>
+                
+                <div class="experience-card">
+                    <div class="exp-header">
+                        <div class="exp-company">SIEM Migration</div>
+                        <div class="exp-period">Azure Expert</div>
+                    </div>
+                    <div class="exp-role">Azure Developer & Architect</div>
+                    <div class="exp-impact">Specialized in <strong>Azure Sentinel</strong> implementations, custom detection rules, and <strong>Target Operating Model</strong> design</div>
+                </div>
+                
+                <div class="experience-card">
+                    <div class="exp-header">
+                        <div class="exp-company">Compliance & Standards</div>
+                        <div class="exp-period">Certified</div>
+                    </div>
+                    <div class="exp-role">Security Standards Expert</div>
+                    <div class="exp-impact">Expert in <strong>Cyber Essentials</strong>, <strong>PCI-DSS</strong> compliance, and regulatory framework implementation</div>
+                </div>
+                
+                <div class="experience-card">
+                    <div class="exp-header">
+                        <div class="exp-company">Threat Intelligence</div>
+                        <div class="exp-period">Advanced</div>
+                    </div>
+                    <div class="exp-role">CTI Program Leader</div>
+                    <div class="exp-impact">Design and implement <strong>threat intelligence</strong> programs, automated IOC integration, and threat hunting capabilities</div>
+                </div>
+                
+                <div class="experience-card">
+                    <div class="exp-header">
+                        <div class="exp-company">Gap Analysis</div>
+                        <div class="exp-period">Methodology</div>
+                    </div>
+                    <div class="exp-role">Assessment & Strategy</div>
+                    <div class="exp-impact">Systematic <strong>gap analysis</strong> across People, Process, Technology to identify transformation opportunities</div>
+                </div>
+                
+                <div class="experience-card">
+                    <div class="exp-header">
+                        <div class="exp-company">Innovation & R&D</div>
+                        <div class="exp-period">Patent Named</div>
+                    </div>
+                    <div class="exp-role">Product Development</div>
+                    <div class="exp-impact">Named on <strong>patent application</strong>, specialist in <strong>Product & Service Development</strong> for cybersecurity solutions</div>
+                </div>
+            </div>
+            
+            <div class="footer-skills">
+                <div class="skill-tags">
+                    <div class="skill-tag">MSSP Migration</div>
+                    <div class="skill-tag">Azure Sentinel</div>
+                    <div class="skill-tag">ITT Process</div>
+                    <div class="skill-tag">Risk Management</div>
+                </div>
+                <div class="cert-tag">Available Immediately</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

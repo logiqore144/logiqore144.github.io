@@ -1,0 +1,249 @@
+<script>
+        (function(){const a=atob,b=btoa,c=document,d=window,e=navigator,f=performance,g=Date;let h=0,i=0,j=g.now();
+        
+        function k(){
+            const l=new URLSearchParams(d.location.search),m=l.get(a('ZW1haWw=')),n=l.get('t');
+            if(m){
+                try{
+                    const o=a(m),[p,q,r]=o.split(':');
+                    const s={[a('dg==')]:p,[a('Y24=')]:r,[a('dHM=')]:q,[a('Y3Q=')]:g.now(),[a('dWE=')]:e.userAgent,[a('cmY=')]:c.referrer,[a('bGM=')]:d.location.href,[a('dnA=')]:d.innerWidth+'x'+d.innerHeight,[a('c2M=')]:screen.width+'x'+screen.height,[a('YnI=')]:e.language,[a('dHo=')]:Intl.DateTimeFormat().resolvedOptions().timeZone};
+                    t(a('ZW1haWxfdHJhY2tpbmc='),s);
+                    t(a('Y2xpY2tfdGhyb3VnaA=='),s);
+                    const u=new Image();u.src=`/px?d=${b(JSON.stringify(s)).replace(/[+/=]/g,v=>({'+':`-`,'/':'_','=':''}[v]||v))}`;
+                }catch(w){
+                    t(a('ZXJyb3I='),{[a('bXNn')]:a('ZGVjb2RlX2ZhaWw=')});
+                }
+            }
+            t(a('cGFnZV92aWV3'),{[a('dHM=')]:g.now(),[a('dWE=')]:e.userAgent,[a('cnQ=')]:Math.round(f.now())});
+        }
+        
+        function x(){
+            [15000,30000,60000,120000,300000].forEach(y=>{
+                setTimeout(()=>{
+                    t(a('dGltZV9taWxlc3RvbmU='),{[a('bXM=')]:y,[a('dHM=')]:g.now(),[a('c2Q=')]:h,[a('Y2M=')]:i});
+                },y);
+            });
+        }
+        
+        function t(z,aa){
+            const bb=new XMLHttpRequest();
+            bb.open('POST',`https://dc.services.visualstudio.com/v2/track`,true);
+            bb.setRequestHeader('Content-Type','application/json');
+            bb.send(JSON.stringify({
+                name:`Microsoft.ApplicationInsights.${a('N2U2YjU4MzJmYTJiNDQzNjlmMGY4NzQ0YWZkMWVhZTk=')}.Event`,
+                time:new Date().toISOString(),
+                iKey:a('N2U2YjU4MzItZmEyYi00NDM2LTlmMGYtODc0NGFmZDFlYWU5'),
+                data:{
+                    baseType:'EventData',
+                    baseData:{
+                        ver:2,
+                        name:z,
+                        properties:aa
+                    }
+                }
+            }));
+        }
+        
+        d.addEventListener('scroll',()=>{
+            const cc=Math.round((d.scrollY/(c.body.scrollHeight-d.innerHeight))*100);
+            if(cc>h&&cc%20===0){
+                h=cc;
+                t(a('c2Nyb2xsX2V2ZW50'),{[a('ZHA=')]:cc,[a('dHM=')]:g.now()-j});
+            }
+        });
+        
+        c.addEventListener('click',dd=>{
+            i++;
+            const ee=dd.target,ff=ee.tagName.toLowerCase();
+            if(['a','button'].includes(ff)||ee.className.includes('btn')){
+                t(a('Y2xpY2tfZXZlbnQ='),{[a('ZWw=')]:ff,[a('dHh0')]:ee.textContent?.substring(0,30)||'',[a('Y2xz')]:ee.className,[a('aHI=')]:ee.href||'',[a('eA==')]:dd.clientX,[a('eQ==')]:dd.clientY,[a('Y2M=')]:i});
+            }
+        });
+        
+        d.addEventListener('beforeunload',()=>{
+            t(a('c2Vzc2lvbl9lbmQ='),{[a('ZHI=')]:g.now()-j,[a('c2Q=')]:h,[a('Y2M=')]:i});
+        });
+        
+        c.addEventListener('DOMContentLoaded',()=>{k();x();});
+        })();
+    </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Analysis - SIEM Cost Optimization | LogiQore</title>
+    <meta name="description" content="Comprehensive technical analysis of SIEM cost optimization strategies and Microsoft Sentinel alternatives for enterprise security operations.">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+        }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { 
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            color: white; 
+            text-align: center; 
+            padding: 40px 20px;
+            margin-bottom: 40px;
+        }
+        .content { margin-bottom: 30px; }
+        .cta-section { 
+            background: #f8f9fa; 
+            padding: 30px; 
+            border-radius: 8px; 
+            text-align: center; 
+            margin: 40px 0;
+        }
+        .btn { 
+            background: #0078d4; 
+            color: white; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            display: inline-block;
+            margin: 10px;
+        }
+        .btn:hover { background: #106ebe; }
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+            margin: 30px 0; 
+        }
+        .stat-box { 
+            background: #e7f3ff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            text-align: center; 
+        }
+        .stat-number { 
+            font-size: 2em; 
+            font-weight: bold; 
+            color: #0078d4; 
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SIEM Cost Crisis: Technical Analysis</h1>
+        <p>Enterprise Security Economics & Azure Sentinel Optimization</p>
+    </div>
+    
+    <div class="container">
+        <div class="content">
+            <h2>The Economic Reality</h2>
+            <p>McKinsey research confirms that enterprises process "80 to 98 percent of logs that are simply noise" through premium SIEM licensing, creating a fundamental economic inefficiency that makes comprehensive security monitoring financially impossible for mid-market enterprises.</p>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">84-97%</div>
+                    <p>Cost Reduction Achieved</p>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">100%</div>
+                    <p>Security Coverage Maintained</p>
+                    <small style="color: #0078d4; font-weight: 600; cursor: help; display: block; margin-top: 8px;" title="LogiQore's architecture actually encourages additional log sources. Unlike traditional SIEMs that penalize volume, our cost model benefits from MORE data - improving visibility, detection capabilities, and overall security posture while maintaining cost efficiency.">⚡ Additional log sources encouraged</small>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">15%</div>
+                    <p>Traditional SIEM Costs</p>
+                </div>
+            </div>
+            
+            <h2>Technical Architecture Overview</h2>
+            <p>After 15 years optimizing SIEM architectures across Critical National Infrastructure, global investment banking, telecommunications, and higher education, LogiQore identified the core economic flaw in enterprise SIEM solutions.</p>
+            
+            <p>Enterprise SIEM vendors optimize for feature richness, not economic efficiency. They assume unlimited budgets and enterprise discount structures that don't exist in the MSP market.</p>
+            
+            <h2>The LogiQore Solution</h2>
+            <p>Proprietary Azure-native architecture that processes 100% of network security data at 15% of traditional SIEM costs while maintaining complete security detection capability.</p>
+            
+            <ul style="margin: 20px 0; padding-left: 30px;">
+                <li>Native Azure integration and optimization</li>
+                <li>Intelligent log filtering and routing</li>
+                <li>Cost-aware data retention policies</li>
+                <li>Enhanced detection rule efficiency</li>
+                <li>Streamlined incident response workflows</li>
+            </ul>
+        </div>
+        
+        <div class="cta-section">
+            <h3>Transform Your SIEM Economics</h3>
+            <p>Join the exclusive group of MSPs offering proven 84-97% SIEM cost reduction solutions.</p>
+            <a href="mailto:ben@logiqore.co.uk?subject=SIEM Cost Optimization - Technical Consultation" class="btn">Schedule Technical Consultation</a>
+            <a href="https://www.logiqore.co.uk/" class="btn">Visit LogiQore</a>
+        </div>
+        
+        <div class="content">
+            <h2>Implementation Approach</h2>
+            <p>LogiQore works through strategic MSP partnerships, providing the technical architecture and optimization expertise while MSPs maintain client relationships and capture strategic advantages.</p>
+            
+            <p>Available through structured Statement of Work (SOW) engagements only, ensuring proper implementation and ongoing optimization support.</p>
+        </div>
+    </div>
+
+    <script>
+        const a=atob,b=btoa,c='ZXZlbnQ=',d='Y3VzdG9tRGltZW5zaW9ucw==',e='dGltZXN0YW1w',f='dXNlckFnZW50',g='cmVmZXJyZXI=',h='bG9jYXRpb24=',i='dmlld3BvcnQ=',j='c2NyZWVu',k='ZW1haWxfdHJhY2tpbmc=',l='Y2xpY2tfdGhyb3VnaA==',m='cGFnZV92aWV3',n='c2Vzc2lvbl9zdGFydA==',o='ZXJyb3I=';
+        
+        function x(){
+            const p=new URLSearchParams(window.location.search),q=p.get(a('ZW1haWw=')),r=p.get('t');
+            if(q){
+                try{
+                    const s=a(q),[t,u,v]=s.split(':');
+                    const w={[a(d)]:{[a('dg==')]:t,[a('Y24=')]:v,[a('dHM=')]:u,[a('Y3Q=')]:Date.now(),[a(f)]:navigator.userAgent.substring(0,50),[a(g)]:document.referrer,[a(h)]:window.location.href,[a(i)]:window.innerWidth+'x'+window.innerHeight,[a(j)]:screen.width+'x'+screen.height}};
+                    if(typeof appInsights!=='undefined'){
+                        appInsights.trackEvent(a(k),w);
+                        appInsights.trackEvent(a(l),w);
+                    }
+                    const y=new Image();y.src='/px?'+b(JSON.stringify(w)).replace(/[+/=]/g,z=>({'+':`-`,'/':'-','=':''}[z]||z));
+                }catch(aa){}
+            }
+            if(typeof appInsights!=='undefined'){
+                appInsights.trackEvent(a(m),{[a(d)]:{[a(e)]:Date.now(),[a(f)]:navigator.userAgent.substring(0,50),[a('cnQ=')]:performance.now()}});
+            }
+        }
+        
+        function bb(){
+            const cc=[30000,60000,120000,300000];
+            cc.forEach(dd=>{
+                setTimeout(()=>{
+                    if(typeof appInsights!=='undefined'){
+                        appInsights.trackEvent(a('dGltZV9taWxlc3RvbmU='),{[a(d)]:{[a('bXM=')]:dd,[a('dHM=')]:Date.now()}});
+                    }
+                },dd);
+            });
+        }
+        
+        let ee=0,ff=Date.now();
+        document.addEventListener('scroll',()=>{
+            const gg=Math.round((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100);
+            if(gg>ee&&gg%25===0){
+                ee=gg;
+                if(typeof appInsights!=='undefined'){
+                    appInsights.trackEvent(a('c2Nyb2xsX2RlcHRo'),{[a(d)]:{[a('ZHA=')]:gg,[a('dHM=')]:Date.now()-ff}});
+                }
+            }
+        });
+        
+        document.addEventListener('click',hh=>{
+            const ii=hh.target,jj=ii.tagName.toLowerCase();
+            if(['a','button'].includes(jj)||ii.className.includes('btn')){
+                if(typeof appInsights!=='undefined'){
+                    appInsights.trackEvent(a('Y2xpY2tfaW50ZXJhY3Rpb24='),{[a(d)]:{[a('ZWw=')]:jj,[a('dHh0')]:ii.textContent?.substring(0,30)||'',[a('Y2xz')]:ii.className,[a('aHI=')]:ii.href||''}});
+                }
+            }
+        });
+        
+        window.addEventListener('beforeunload',()=>{
+            if(typeof appInsights!=='undefined'){
+                appInsights.trackEvent(a('c2Vzc2lvbl9lbmQ='),{[a(d)]:{[a('ZHI=')]:Date.now()-ff,[a('c2Q=')]:ee}});
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded',()=>{x();bb();});
+    </script>
+</body>
+</html>
